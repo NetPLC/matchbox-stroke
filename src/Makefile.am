@@ -13,6 +13,7 @@ matchbox_stroke_SOURCES =                                          \
        matchbox-stroke.c                                           \
        matchbox-stroke-ui.c                                        \
        matchbox-stroke-recog.c                                     \
+       util-hash.c                                                 \
        util.c
 
 

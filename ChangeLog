@@ -1,0 +1,10 @@
+2005-05-04  mallum,,,  <mallum@openedhand.com>
+
+	* src/Makefile.am:
+	* src/matchbox-stroke.h:
+	Layout some more data structures	
+	* src/config-parser.c:
+	Initial config parsing code
+	* src/util-hash.c:
+	Add simple hash implementation
+

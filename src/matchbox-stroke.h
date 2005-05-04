@@ -37,33 +37,89 @@
 #define MARK() DBG("mark")
 
 typedef void*         pointer;
+typedef const void*   constpointer;
 typedef unsigned char uchar ;
 typedef Bool          boolean ;
 
+typedef struct UtilHash            UtilHash;
+typedef struct UtilHashNode        UtilHashNode;
 
-typedef struct MBStroke      MBStroke;
-typedef struct MBStrokeUI    MBStrokeUI;
-typedef struct MBStrokeMode  MBStrokeMode;
-
-typedef struct MBStrokeStroke MBStrokeStroke;
+typedef struct MBStroke            MBStroke;
+typedef struct MBStrokeUI          MBStrokeUI;
+typedef struct MBStrokeMode        MBStrokeMode;
+typedef struct MBStrokeAction      MBStrokeAction;
+typedef struct MBStrokeStroke      MBStrokeStroke;
 typedef struct MBStrokeStrokePoint MBStrokeStrokePoint;
+
+typedef enum 
+{
+  MBStrokeActionNone  = 0,
+  MBStrokeActionChar,
+  MBStrokeActionXKeySym,
+  MBStrokeActionModifier,
+  MBStrokeActionModeSwitch,
+  MBStrokeActionExec,
+
+} MBStrokeActionType;
 
 
 struct MBStroke
 {
-
-  MBStrokeStroke *current_stroke;
   MBStrokeUI     *ui;
+  MBStrokeMode   *modes, *global_mode, *current_mode;
+  MBStrokeStroke *current_stroke;
 };
 
 
 struct MBStrokeMode
 {
   char        *name;
+  UtilHash    *exact_match_actions; 
+
   /*
-  UtilHash    *exact_match_hash;
   UtilRegexps *fuzzy_matches;
   */
+
+  MBStrokeMode *next;
+};
+
+struct MBStrokeAction
+{
+  MBStrokeActionType type;
+
+  union 
+  {
+    struct 
+    {
+      uchar *data;
+    } 
+    utf8char; 
+
+    struct 
+    {
+      KeySym data;
+    } 
+    keysym; 
+
+    struct 
+    {
+      int data; /* ??? */
+    } 
+    modifier; 
+
+    struct 
+    {
+      MBStrokeMode data;
+    } 
+    mode; 
+
+    struct 
+    {
+      char *data;
+    } 
+    exec; 
+
+  } u;
 };
 
 /* stroke */
@@ -97,6 +153,11 @@ matchbox_stroke_ui_init(MBStroke *stroke);
 
 /* Util */
 
+#define streq(a,b)      (strcmp(a,b) == 0)
+#define strcaseeq(a,b)  (strcasecmp(a,b) == 0)
+#define unless(x)       if (!(x))
+#define util_abs(x)     ((x) > 0) ? (x) : -1*(x)
+
 void*
 util_malloc0(int size);
 
@@ -109,6 +170,18 @@ util_utf8_char_cnt(const unsigned char *str);
 boolean 
 util_file_readable(char *path);
 
+/* Util Hash */
 
+UtilHash*
+util_hash_new(void);
+
+pointer
+util_hash_lookup(UtilHash *hash, char *key);
+
+void
+util_hash_insert(UtilHash *hash, char *key, pointer val);
+
+void 
+util_hash_destroy(UtilHash *hash);
 
 #endif
