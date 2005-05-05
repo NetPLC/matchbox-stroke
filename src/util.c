@@ -83,3 +83,78 @@ util_file_readable(char *path)
  
  return True;
 }
+
+void 	 /* skip_first_last */
+util_bresenham_line(int                x1, 
+		    int                y1, 
+		    int                x2, 
+		    int                y2,
+		    UtilPlotFunc       plot_func, 
+		    void              *userdata)
+{
+    int dy = y2 - y1;
+    int dx = x2 - x1;
+    int stepx, stepy;
+    
+    if (dy < 0) 
+      {
+	dy = -dy;
+	stepy = -1;
+      } 
+    else stepy = 1;
+
+    if (dx < 0) 
+      {
+	dx = -dx;
+	stepx = -1;
+      } 
+    else stepx = 1;
+    
+    if (dx == 0 && dy == 0)
+	return;
+
+    dy <<= 1;
+    dx <<= 1;
+
+    if (dx > dy) 
+      {
+	int fraction = dy - (dx >> 1);
+
+	while (1) 
+	  {
+	    if (fraction >= 0) 
+	      {
+		y1 += stepy;
+		fraction -= dx;
+	      }
+
+	    x1       += stepx;
+	    fraction += dy;
+
+	    if (x1 == x2)
+		break;
+
+	    (plot_func)(x1, y1, userdata);
+	}
+      } 
+    else 
+      {
+	int fraction = dx - (dy >> 1);
+	while (1) 
+	  {
+	    if (fraction >= 0) 
+	      {
+		x1 += stepx;
+		fraction -= dy;
+	      }
+
+	    y1       += stepy;
+	    fraction += dx;
+
+	    if (y1 == y2)
+		break;
+
+	    (plot_func)(x1, y1, userdata);
+	}
+    }
+}

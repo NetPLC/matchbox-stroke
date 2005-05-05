@@ -1,3 +1,24 @@
+2005-05-05  mallum,,,  <mallum@openedhand.com>
+
+	* src/matchbox-stroke-recog.c: (mb_stroke_stroke_point_new),
+	(mb_stroke_stroke_new), (mb_stroke_stroke_get_last_point),
+	(mb_stroke_stroke_append_point):
+	* src/matchbox-stroke-ui.c: (fix_image), (get_xevent_timed),
+	(init_pentip_image), (mb_stroke_ui_show),
+	(mb_stroke_ui_resources_create), (mb_stroke_ui_clear_recogniser),
+	(mb_stroke_ui_pentip_draw_point),
+	(mb_stroke_ui_pentip_draw_line_to), (mb_stroke_ui_stroke_start),
+	(mb_stroke_ui_stroke_update), (mb_stroke_ui_stroke_finish),
+	(mb_stroke_ui_event_loop), (mb_stroke_ui_display_width),
+	(mb_stroke_ui_display_height), (matchbox_stroke_ui_realize),
+	(matchbox_stroke_ui_init):
+	* src/matchbox-stroke.c: (mb_stroke_app_new), (mb_stroke_run),
+	(main):
+	* src/matchbox-stroke.h:
+	* src/util.c: (util_file_readable):
+	Add basic ui drawing code.
+
+
 2005-05-04  mallum,,,  <mallum@openedhand.com>
 
 	* src/Makefile.am:

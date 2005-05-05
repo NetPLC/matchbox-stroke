@@ -41,6 +41,8 @@ typedef const void*   constpointer;
 typedef unsigned char uchar ;
 typedef Bool          boolean ;
 
+typedef void (*UtilPlotFunc) (int x, int y, void *data);
+
 typedef struct UtilHash            UtilHash;
 typedef struct UtilHashNode        UtilHashNode;
 
@@ -124,6 +126,8 @@ struct MBStrokeAction
 
 /* stroke */
 
+MBStrokeStroke*
+mb_stroke_current_stroke(MBStroke *stroke);
 
 /* Recogniser */
 
@@ -131,13 +135,16 @@ MBStrokeStrokePoint*
 mb_stroke_stroke_point_new(int x, int y);
 
 MBStrokeStroke*
-mb_stroke_stroke_new(void);
+mb_stroke_stroke_new(MBStroke *stroke_app);
 
 void
 mb_stroke_stroke_append_point(MBStrokeStroke *stroke, int x, int y);
 
 int 				/* temp */
 mb_stroke_stroke_trans (MBStrokeStroke *stroke, char *sequence);
+
+MBStrokeStrokePoint*
+mb_stroke_stroke_get_last_point(MBStrokeStroke *stroke, int *x, int *y);
 
 
 /* UI */
@@ -169,6 +176,14 @@ util_utf8_char_cnt(const unsigned char *str);
 
 boolean 
 util_file_readable(char *path);
+
+void 	 /* skip_first_last */
+util_bresenham_line(int                x1, 
+		    int                y1, 
+		    int                x2, 
+		    int                y2,
+		    UtilPlotFunc       plot_func, 
+		    void               *userdata);
 
 /* Util Hash */
 

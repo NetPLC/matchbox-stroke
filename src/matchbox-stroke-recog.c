@@ -27,16 +27,16 @@ struct MBStrokeStroke
   int                  min_x, min_y, max_x, max_y;
   MBStrokeStrokePoint *first_point, *last_point;
   int                  n_points;
+  int                  last_x, last_y;
+  MBStroke            *stroke_app;
 };
 
 
 struct MBStrokeStrokePoint
 {
-
   MBStrokeStrokePoint *next;
   int x;
   int y;
-
 };
 
 MBStrokeStrokePoint*
@@ -54,7 +54,7 @@ mb_stroke_stroke_point_new(int x, int y)
 }
 
 MBStrokeStroke*
-mb_stroke_stroke_new(void)
+mb_stroke_stroke_new(MBStroke *stroke_app)
 {
   MBStrokeStroke *stroke = NULL;
 
@@ -64,10 +64,30 @@ mb_stroke_stroke_new(void)
   stroke->min_y = 10000;
   stroke->max_x = -1;
   stroke->max_y = -1;
+  stroke->first_point        = NULL;
+  stroke->stroke_app         = stroke_app;
 
-  stroke->first_point = NULL;
+  stroke_app->current_stroke = stroke;
 
   return stroke;
+}
+
+MBStrokeStrokePoint*
+mb_stroke_stroke_get_last_point(MBStrokeStroke *stroke, int *x, int *y)
+{
+  MBStrokeStrokePoint *pt;
+
+  if (stroke->first_point == stroke->last_point)
+    return NULL;
+
+  for (pt = stroke->first_point; 
+       pt->next != stroke->last_point;
+       pt = pt->next);
+
+  *x = pt->x;
+  *y = pt->y;
+
+  return pt;
 }
 
 void
@@ -89,7 +109,6 @@ mb_stroke_stroke_append_point(MBStrokeStroke *stroke, int x, int y)
       if (stroke->first_point == NULL)
 	{
 	  stroke->first_point = stroke->last_point = new_pt;
-
 	}
       else
 	{
@@ -171,6 +190,8 @@ mb_stroke_stroke_append_point(MBStrokeStroke *stroke, int x, int y)
       new_pt->x = x;
       new_pt->y = y;
       new_pt->next = NULL;
+
+      
     }
 }
 

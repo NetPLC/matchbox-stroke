@@ -1,7 +1,13 @@
 #include "matchbox-stroke.h"
 
+MBStrokeStroke*
+mb_stroke_current_stroke(MBStroke *stroke)
+{
+  return stroke->current_stroke;
+}
+
 MBStroke*
-matchbox_stroke_new(int *argc, char ***argv)
+mb_stroke_app_new(int *argc, char ***argv)
 {
   MBStroke *stroke = NULL;
 
@@ -17,7 +23,7 @@ matchbox_stroke_new(int *argc, char ***argv)
 }
 
 void
-matchbox_stroke_run(MBStroke *stroke)
+mb_stroke_run(MBStroke *stroke)
 {
   mb_stroke_ui_event_loop(stroke->ui);
 }
@@ -27,12 +33,10 @@ main(int argc, char **argv)
 {
   MBStroke *stroke = NULL;
 
-  stroke = matchbox_stroke_new(&argc, &argv);
-
-
+  stroke = mb_stroke_app_new(&argc, &argv);
 
   if (stroke)
-    matchbox_stroke_run(stroke);
+    mb_stroke_run(stroke);
 
   return 1;
 }
