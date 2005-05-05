@@ -90,13 +90,23 @@ mb_stroke_stroke_get_last_point(MBStrokeStroke *stroke, int *x, int *y)
   return pt;
 }
 
+static void
+point_adder_cb(int x, int y, void *cookie)
+{
+  MBStrokeStroke      *stroke = (MBStrokeStroke*)cookie;
+  MBStrokeStrokePoint *new_pt = NULL;
+  
+  new_pt = mb_stroke_stroke_point_new(x, y);
+
+  stroke->last_point->next = new_pt;
+  stroke->last_point       = new_pt;
+
+  stroke->n_points++;
+}
+
 void
 mb_stroke_stroke_append_point(MBStrokeStroke *stroke, int x, int y)
 {
-  MBStrokeStrokePoint *new_pt = NULL;
-  int                  delx, dely;
-  float                ix, iy; 
-
   /*  XXX TODO: 
    *   Does it make more sense to preallocate stroke points ( array )
    *   and avoid mass of mallocs etc ?
@@ -104,94 +114,37 @@ mb_stroke_stroke_append_point(MBStrokeStroke *stroke, int x, int y)
 
   if (stroke->n_points < STROKE_MAX_POINTS) 
     {
-      new_pt = mb_stroke_stroke_point_new(x, y);
-
       if (stroke->first_point == NULL)
 	{
-	  stroke->first_point = stroke->last_point = new_pt;
+	  stroke->first_point = stroke->last_point = mb_stroke_stroke_point_new(x, y);
 	}
       else
 	{
-	  /* XXX FIX THIS
-           *  - get rid of float code !
-           *  - Im sure interp can be done nicer and smaller
-	  */
+	  MBStrokeStrokePoint *new_pt = NULL;
 
-	  /* interpolate between last and current point */
-	  delx = (x - stroke->last_point->x);
-	  dely = (y - stroke->last_point->y);
+	  /* interp all points between this and last */
 
-	  /* step by the greatest delta direction */
-	  if (abs(delx) > abs(dely)) 
-	    {
-	      iy = stroke->last_point->y;
+	  util_bresenham_line(stroke->last_point->x, 
+			      stroke->last_point->y,
+			      x,
+			      y,
+			      point_adder_cb,
+			      (void*)stroke);
 
-	      /* go from the last point to the current, whatever direction it
-		 may be */
-	      for (ix = stroke->last_point->x;
-		   (delx > 0) ? (ix < x) : (ix > x);
-		   ix += (delx > 0) ? 1 : -1) 
-		{
+	  /* add last point manually  */
 
-		  /* step the other axis by the correct increment */
+	  new_pt = mb_stroke_stroke_point_new(x, y);
+	  stroke->last_point->next = new_pt;
+	  stroke->last_point       = new_pt;
 
-		  iy += fabs(((float) dely
-			      / (float) delx)) * (float) ((dely < 0) ? -1.0 : 1.0);
+	  /* figure out bounds */
 
-		  /* add the interpolated point */
-		  stroke->last_point->next = new_pt;
-		  stroke->last_point       = new_pt;
-		  new_pt->x = (int)ix;
-		  new_pt->y = (int)iy;
-
-		  /* update metrics */
-		  if (((int) ix) < stroke->min_x) stroke->min_x = (int) ix;
-		  if (((int) ix) > stroke->max_x) stroke->max_x = (int) ix;
-		  if (((int) iy) < stroke->min_y) stroke->min_y = (int) iy;
-		  if (((int) iy) > stroke->max_y) stroke->max_y = (int) iy;
-		  stroke->n_points++;
-
-		  new_pt = mb_stroke_stroke_point_new(0, 0);
-		}
-	    } 
-	  else   /* same thing, but for dely larger than delx case... */
-	    {
-	      ix = stroke->last_point->x;
-
-	      /* go from the last point to the current, whatever direction
-		 it may be */
-	      for (iy = stroke->last_point->y; 
-		   (dely > 0) ? (iy < y) : (iy > y);
-		   iy += (dely > 0) ? 1 : -1) 
-		{
-
-		  /* step the other axis by the correct increment */
-		  ix += fabs(((float) delx / (float) dely))
-		    * (float) ((delx < 0) ? -1.0 : 1.0);
-
-		  /* add the interpolated point */
-		  stroke->last_point->next = new_pt;
-		  stroke->last_point = new_pt;
-		  new_pt->x = (int)ix;
-		  new_pt->y = (int)iy;
-
-		  /* update metrics */
-		  if (((int) ix) < stroke->min_x) stroke->min_x = (int) ix;
-		  if (((int) ix) > stroke->max_x) stroke->max_x = (int) ix;
-		  if (((int) iy) < stroke->min_y) stroke->min_y = (int) iy;
-		  if (((int) iy) > stroke->max_y) stroke->max_y = (int) iy;
-		  stroke->n_points++;
-
-		  new_pt = mb_stroke_stroke_point_new(0, 0);
-		}
-	    }
+	  if (x < stroke->min_x) stroke->min_x = x;
+	  if (x > stroke->max_x) stroke->max_x = x;
+	  if (y < stroke->min_y) stroke->min_y = y;
+	  if (y > stroke->max_y) stroke->max_y =  y;
 	}
-
-      new_pt->x = x;
-      new_pt->y = y;
-      new_pt->next = NULL;
-
-      
+      stroke->n_points++; 
     }
 }
 

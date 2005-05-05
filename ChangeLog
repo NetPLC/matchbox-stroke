@@ -1,5 +1,11 @@
 2005-05-05  mallum,,,  <mallum@openedhand.com>
 
+	* src/matchbox-stroke-recog.c: (mb_stroke_stroke_get_last_point),
+	(point_adder_cb), (mb_stroke_stroke_append_point):
+	Faster, smaller, cleaner point collection
+
+2005-05-05  mallum,,,  <mallum@openedhand.com>
+
 	* src/matchbox-stroke-recog.c: (mb_stroke_stroke_point_new),
 	(mb_stroke_stroke_new), (mb_stroke_stroke_get_last_point),
 	(mb_stroke_stroke_append_point):
