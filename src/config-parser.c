@@ -7,7 +7,7 @@
 
     </options>
 
-    <stroke .../> 		/* global stroke */
+    <stroke .../> 	
 
     <mode id="abc">
     <stroke exact="12345" 
@@ -89,14 +89,12 @@ ModLookup[] =
 
 typedef struct MBStrokeConfigState
 {
-  MBKeyboard       *keyboard;
-  MBKeyboardLayout *current_layout;
-  MBKeyboardRow    *current_row;
-  MBKeyboardKey    *current_key;
+  MBStroke         *stroke;
+  MBStrokeMode     *current_mode;
   Bool              error;
   char             *error_msg;
 }
-MBKeyboardStrokeState;
+MBStrokeConfigState;
 
 KeySym
 config_str_to_keysym(const char* str)
@@ -181,12 +179,6 @@ config_load_file(MBStroke *stroke)
 	  i++;
     }
 
-  if (variant_in)
-    {
-      n = strlen(variant_in) + 2;
-      variant = alloca(n);
-      snprintf(variant, n, "-%s", variant_in);
-    }
 
   if (getenv("HOME"))
     {
@@ -223,8 +215,6 @@ config_load_file(MBStroke *stroke)
 
   DBG("loading %s\n", path);
 
-  kbd->config_file = strdup(path);
-
   result = malloc(stat_info.st_size + 1);
 
   n = fread(result, 1, stat_info.st_size, fp);
@@ -251,11 +241,124 @@ attr_get_val (char *key, const char **attr)
   return NULL;
 }
 
+static void
+config_handle_mode_tag(MBStrokeConfigState *state, const char **attr)
+{
+  const char *val;
+
+  if ((val = attr_get_val("id", attr)) != NULL)
+    {
+      state->current_mode = mb_stroke_mode_new(state->stroke, val);
+
+      mb_stroke_add_mode(state->stroke, state->current_mode); 
+    }
+  else
+    {
+      state->error_msg = "mode tag missing id attribute";
+      state->error     = True;
+      return;
+    }
+}
+
+static void
+config_handle_stroke_tag(MBStrokeConfigState *state, const char **attr)
+{
+  MBStrokeAction *action = NULL;
+  const char     *val = NULL, *exact = NULL, *sloppy_match = NULL;
+  KeySym          found_keysym;
+
+  /* action */
+
+  val = attr_get_val("action", attr);
+
+  if (!val)
+    {
+      state->error_msg = "stroke tag missing 'action' attribute";
+      state->error     = True;
+      return;
+    }
+
+
+  action = mb_stroke_action_new(state->stroke);
+
+  if (!strncmp(val, "modifier:", 9))
+    {
+      /* TODO
+      MBKeyboardKeyModType found_type;
+      
+      DBG("checking '%s'", &val[9]);
+      
+      found_type = config_str_to_modtype(&val[9]);
+      
+      if (found_type)
+	{
+	  mb_kbd_key_set_modifer_action(state->current_key,
+					keystate,
+					found_type);
+	}
+      else
+	{
+	  state->error = True;
+	  return;
+	}
+      */
+    }
+  else if (!strncmp(val, "xkeysym:", 8))
+    {
+      DBG("Checking %s\n", &val[8]);
+
+      /* found_keysym = XStringToKeysym(&val[8]); */
+
+      /*
+	    }
+	  else 
+	    {
+	      state->error = True;
+	      return;
+	    }
+      */
+    }
+  else
+    {
+      /* must be keysym */
+      if (strlen(val) > 1  	/* match backspace, return etc */
+	  && ((found_keysym  = config_str_to_keysym(val)) != 0))
+	{
+	  /*
+	      mb_kbd_key_set_keysym_action(state->current_key, 
+					   keystate,
+					   found_keysym);
+	  */
+
+	}
+      else
+	{
+	  mb_stroke_action_set_as_utf8char(action, val);
+	}
+    }
+
+  /* exact match, sloppy */
+
+  exact = attr_get_val("exact", attr);
+
+  if (!exact)
+    {
+      state->error_msg = "stroke tag missing 'exact' attribute";
+      state->error     = True;
+      return;
+    }
+
+  mb_stroke_mode_add_exact_match(state->current_mode, exact, action);
+
+
+  /*  */
+}
+
 
 static void 
 config_xml_start_cb(void *data, const char *tag, const char **attr)
 {
-  MBKeyboardConfigState *state = (MBKeyboardConfigState *)data;
+  MBStrokeConfigState *state = (MBStrokeConfigState *)data;
 
   if (streq(tag, "mode"))
     {
@@ -263,7 +366,7 @@ config_xml_start_cb(void *data, const char *tag, const char **attr)
     }
   else if (streq(tag, "stroke"))
     {
-      config_handle_row_tag(state, attr);
+      config_handle_stroke_tag(state, attr);
     }
 
   if (state->error)
@@ -273,11 +376,11 @@ config_xml_start_cb(void *data, const char *tag, const char **attr)
 }
 
 int
-mb_stroke_config_load(MBstroke *stoke)
+mb_stroke_config_load(MBStroke *stroke)
 {
   unsigned char         *data;
   XML_Parser             p;
-  MBstrokeConfigState *state;
+  MBStrokeConfigState *state;
 
   if ((data = config_load_file(stroke)) == NULL)
     util_fatal_error("Couldn't find a keyboard config file\n");
@@ -287,9 +390,10 @@ mb_stroke_config_load(MBstroke *stoke)
   if (!p) 
     util_fatal_error("Couldn't allocate memory for XML parser\n");
 
-  state = util_malloc0(sizeof(MBstrokeConfigState));
+  state = util_malloc0(sizeof(MBStrokeConfigState));
 
-  state->stroke = stroke;
+  state->stroke       = stroke;
+  state->current_mode = mb_stroke_global_mode(stroke);
 
   XML_SetElementHandler(p, config_xml_start_cb, NULL);
 
@@ -299,10 +403,9 @@ mb_stroke_config_load(MBstroke *stoke)
 
   if (! XML_Parse(p, data, strlen(data), 1)) {
     fprintf(stderr, 
-	    "matchbox-keyboard: XML Parse error at line %d:\n%s\n of %s",
+	    "matchbox-keyboard: XML Parse error at line %d:\n%s\n",
 	    XML_GetCurrentLineNumber(p),
-	    XML_ErrorString(XML_GetErrorCode(p)),
-	    kbd->config_file);
+	    XML_ErrorString(XML_GetErrorCode(p)));
     util_fatal_error("XML Parse failed.\n");
   }
 

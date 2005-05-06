@@ -73,61 +73,66 @@ struct MBStroke
 };
 
 
-struct MBStrokeMode
-{
-  char        *name;
-  UtilHash    *exact_match_actions; 
 
-  /*
-  UtilRegexps *fuzzy_matches;
-  */
-
-  MBStrokeMode *next;
-};
-
-struct MBStrokeAction
-{
-  MBStrokeActionType type;
-
-  union 
-  {
-    struct 
-    {
-      uchar *data;
-    } 
-    utf8char; 
-
-    struct 
-    {
-      KeySym data;
-    } 
-    keysym; 
-
-    struct 
-    {
-      int data; /* ??? */
-    } 
-    modifier; 
-
-    struct 
-    {
-      MBStrokeMode data;
-    } 
-    mode; 
-
-    struct 
-    {
-      char *data;
-    } 
-    exec; 
-
-  } u;
-};
 
 /* stroke */
 
+void
+mb_stroke_add_mode(MBStroke     *stroke, 
+		   MBStrokeMode *mode);
+
+MBStrokeMode*
+mb_stroke_lookup_mode(MBStroke     *stroke, 
+		      char         *name);
+
+MBStrokeMode*
+mb_stroke_current_mode(MBStroke     *stroke);
+
+MBStrokeMode*
+mb_stroke_global_mode(MBStroke     *stroke);
+
 MBStrokeStroke*
 mb_stroke_current_stroke(MBStroke *stroke);
+
+
+/* mode */
+
+MBStrokeMode*
+mb_stroke_mode_new(MBStroke *stroke_app, char *name);
+
+void
+mb_stroke_mode_add_exact_match(MBStrokeMode   *mode,
+			       char           *match_str,
+			       MBStrokeAction *action);
+
+const char*
+mb_stroke_mode_name(MBStrokeMode   *mode);
+
+MBStrokeMode*
+mb_stroke_mode_next(MBStrokeMode   *mode);
+
+/* actions */
+
+MBStrokeAction*
+mb_stroke_action_new(MBStroke *stroke_app);
+
+MBStrokeActionType
+mb_stroke_action_type(MBStrokeAction *action);
+
+void
+mb_stroke_action_set_as_utf8char(MBStrokeAction *action,
+				 unsigned char  *utf8char);
+
+unsigned char*
+mb_stroke_action_get_utf8char(MBStrokeAction *action);
+
+void
+mb_stroke_action_set_as_keysym(MBStrokeAction *action ,
+			       KeySym          keysym);
+
+void
+mb_stroke_action_set_as_mode_switch(MBStrokeAction *action,
+				    char           *mode_name);
 
 /* Recogniser */
 

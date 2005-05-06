@@ -13,6 +13,9 @@ matchbox_stroke_SOURCES =                                          \
        matchbox-stroke.c                                           \
        matchbox-stroke-ui.c                                        \
        matchbox-stroke-recog.c                                     \
+       matchbox-stroke-mode.c                                      \
+       matchbox-stroke-action.c                                    \
+       config-parser.c                                             \
        util-hash.c                                                 \
        util.c
 

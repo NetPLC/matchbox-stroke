@@ -1,3 +1,17 @@
+2005-05-06  mallum,,,  <mallum@openedhand.com>
+
+	* src/Makefile.am:
+	* src/config-parser.c: (config_load_file),
+	(config_handle_stroke_tag), (config_xml_start_cb),
+	(mb_stroke_config_load):
+	* src/matchbox-stroke-action.c:
+	* src/matchbox-stroke-mode.c:
+	* src/matchbox-stroke.c: (mb_stroke_current_stroke),
+	(mb_stroke_lookup_mode), (mb_stroke_current_mode),
+	(mb_stroke_global_mode), (mb_stroke_app_new):
+	* src/matchbox-stroke.h:
+	Add beginnings of config parser and associated data structs
+
 2005-05-05  mallum,,,  <mallum@openedhand.com>
 
 	* src/matchbox-stroke-recog.c: (mb_stroke_stroke_get_last_point),
