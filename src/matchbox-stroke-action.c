@@ -60,11 +60,11 @@ mb_stroke_action_type(MBStrokeAction *action)
 }
 
 void
-mb_stroke_action_set_as_utf8char(MBStrokeAction *action,
-				 unsigned char  *utf8char)
+mb_stroke_action_set_as_utf8char(MBStrokeAction      *action,
+				 const unsigned char *utf8char)
 {
   action->type             = MBStrokeActionChar;
-  action->u.utf8char.data = utf8char; 
+  action->u.utf8char.data = strdup(utf8char); 
 }
 
 unsigned char*

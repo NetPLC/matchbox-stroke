@@ -94,16 +94,25 @@ mb_stroke_global_mode(MBStroke     *stroke);
 MBStrokeStroke*
 mb_stroke_current_stroke(MBStroke *stroke);
 
+/* config */
+
+int
+mb_stroke_config_load(MBStroke *stroke);
 
 /* mode */
 
 MBStrokeMode*
-mb_stroke_mode_new(MBStroke *stroke_app, char *name);
+mb_stroke_mode_new(MBStroke *stroke_app, const char *name);
 
 void
 mb_stroke_mode_add_exact_match(MBStrokeMode   *mode,
-			       char           *match_str,
+			       const char     *match_str,
 			       MBStrokeAction *action);
+
+MBStrokeAction*
+mb_stroke_mode_find_action(MBStrokeMode   *mode,
+			   char           *match_seq);
+
 
 const char*
 mb_stroke_mode_name(MBStrokeMode   *mode);
@@ -120,8 +129,9 @@ MBStrokeActionType
 mb_stroke_action_type(MBStrokeAction *action);
 
 void
-mb_stroke_action_set_as_utf8char(MBStrokeAction *action,
-				 unsigned char  *utf8char);
+mb_stroke_action_set_as_utf8char(MBStrokeAction      *action,
+				 const unsigned char *utf8char);
+
 
 unsigned char*
 mb_stroke_action_get_utf8char(MBStrokeAction *action);

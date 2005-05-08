@@ -450,6 +450,9 @@ mb_stroke_ui_stroke_finish(MBStrokeUI *ui, int x, int y)
 			      &recog[0]))
     {
       printf("got '%s'\n", recog);
+      if (mb_stroke_mode_find_action(mb_stroke_current_mode(ui->stroke),
+				     recog))
+	printf("MATCHED!\n");
     }
   else
     {

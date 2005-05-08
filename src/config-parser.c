@@ -264,7 +264,7 @@ static void
 config_handle_stroke_tag(MBStrokeConfigState *state, const char **attr)
 {
   MBStrokeAction *action = NULL;
-  const char     *val = NULL, *exact = NULL, *sloppy_match = NULL;
+  const char     *val = NULL, *exact = NULL; /* , *sloppy_match = NULL; */
   KeySym          found_keysym;
 
   /* action */
@@ -334,6 +334,8 @@ config_handle_stroke_tag(MBStrokeConfigState *state, const char **attr)
       else
 	{
 	  mb_stroke_action_set_as_utf8char(action, val);
+
+	  DBG("Addded keysym action for '%s'\n", val);
 	}
     }
 
@@ -348,6 +350,7 @@ config_handle_stroke_tag(MBStrokeConfigState *state, const char **attr)
       return;
     }
 
+  
   mb_stroke_mode_add_exact_match(state->current_mode, exact, action);
 
 

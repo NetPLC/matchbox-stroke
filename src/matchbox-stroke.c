@@ -42,15 +42,21 @@ mb_stroke_app_new(int *argc, char ***argv)
 
   stroke = util_malloc0(sizeof(MBStroke));
 
-  stroke->global_mode = mb_stroke_mode_new(stroke, "global");
+  stroke->global_mode = mb_stroke_mode_new(stroke, 
+					   "global");
 
   mb_stroke_add_mode(stroke, stroke->global_mode);
+
+  if (!mb_stroke_config_load(stroke))
+    return NULL;
 
   if (!matchbox_stroke_ui_init(stroke))
     return NULL;
 
   if (!matchbox_stroke_ui_realize(stroke->ui))
     return NULL;
+
+  stroke->current_mode = stroke->global_mode;
 
   return stroke;
 }

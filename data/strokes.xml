@@ -1,0 +1,27 @@
+<strokes>
+
+    <options>
+
+    </options>
+
+   <!-- global -->
+
+   <stroke exact="741269" action="a" />
+
+   <stroke exact="3214789" action="c" />
+
+   <stroke exact="1235789" action="z" />
+
+    <mode id="abc">
+<!--
+    <stroke exact="12345" 
+            sloppy="21[12]323" 
+            action="utf8char|lookupmodifiexec: />
+-->
+
+    </mode>
+    <mode id="ABC">
+
+    </mode>
+
+</strokes>

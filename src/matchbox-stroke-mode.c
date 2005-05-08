@@ -14,7 +14,7 @@ struct MBStrokeMode
 };
 
 MBStrokeMode*
-mb_stroke_mode_new(MBStroke *stroke_app, char *name)
+mb_stroke_mode_new(MBStroke *stroke_app, const char *name)
 {
   MBStrokeMode *mode = NULL;
 
@@ -22,8 +22,9 @@ mb_stroke_mode_new(MBStroke *stroke_app, char *name)
 
   /* extact_match_actions hash */
 
-  mode->name       = strdup(name);
-  mode->stroke_app = stroke_app;
+  mode->exact_match_actions = util_hash_new();
+  mode->name                = strdup(name);
+  mode->stroke_app          = stroke_app;
 
   return mode;
 }
@@ -52,12 +53,22 @@ mb_stroke_add_mode(MBStroke     *stroke,
 
 void
 mb_stroke_mode_add_exact_match(MBStrokeMode   *mode,
-			       char           *match_str,
+			       const char     *match_str,
 			       MBStrokeAction *action)
 {
-  ;
+  DBG("Adding match for mode:%s, '%s'", mode->name, match_str);
+  util_hash_insert(mode->exact_match_actions, 
+		   strdup(match_str), 
+		   (pointer)action);
+
 }
 
+MBStrokeAction*
+mb_stroke_mode_find_action(MBStrokeMode   *mode,
+			   char           *match_seq)
+{
+  return util_hash_lookup(mode->exact_match_actions, match_seq);
+}
 
 const char*
 mb_stroke_mode_name(MBStrokeMode   *mode)

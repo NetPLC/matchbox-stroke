@@ -1,3 +1,14 @@
+2005-05-08  mallum,,,  <mallum@openedhand.com>
+
+	* data/strokes.xml:
+	* src/config-parser.c: (config_handle_stroke_tag):
+	* src/matchbox-stroke-action.c: (mb_stroke_action_type):
+	* src/matchbox-stroke-mode.c: (mb_stroke_mode_new):
+	* src/matchbox-stroke-ui.c: (mb_stroke_ui_stroke_finish):
+	* src/matchbox-stroke.c: (mb_stroke_app_new):
+	* src/matchbox-stroke.h:
+	Now performs basic matches via loaded XML config.
+
 2005-05-06  mallum,,,  <mallum@openedhand.com>
 
 	* src/Makefile.am:
