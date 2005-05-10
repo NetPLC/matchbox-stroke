@@ -220,7 +220,16 @@ mb_stroke_stroke_trans (MBStrokeStroke *stroke, char *sequence)
   DBG(" bound_x_2: %d\n",bound_x_2);
   DBG(" bound_y_1: %d\n",bound_y_1);
   DBG(" bound_y_2: %d\n",bound_y_2);
-  
+
+  mb_stroke_ui_debug_grid(stroke->stroke_app->ui, 
+			  stroke->min_x,
+			  stroke->min_y,
+			  stroke->max_x,
+			  stroke->max_y,
+			  bound_x_1,
+			  bound_x_2,
+			  bound_y_1,
+			  bound_y_2);
 
   /*
     build string by placing points in bins, collapsing bins and

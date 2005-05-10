@@ -55,6 +55,9 @@ static struct {
   "\15\15\24\345\15\15\12\0\0\0\0",
 };
 
+#define PENTIP_WIDTH  (PentipImage.width)
+#define PENTIP_HEIGHT (PentipImage.height)
+
 
 static void
 mb_stroke_ui_clear_recogniser(MBStrokeUI *ui);
@@ -341,8 +344,8 @@ mb_stroke_ui_resources_create(MBStrokeUI  *ui)
 
     ui->xgc = XCreateGC(ui->xdpy, ui->xwin, 0, NULL);
 
-    XSetBackground(ui->xdpy, ui->xgc, BlackPixel(ui->xdpy, ui->xscreen ));
-    XSetForeground(ui->xdpy, ui->xgc, WhitePixel(ui->xdpy, ui->xscreen ));
+    XSetBackground(ui->xdpy, ui->xgc, WhitePixel(ui->xdpy, ui->xscreen ));
+    XSetForeground(ui->xdpy, ui->xgc, BlackPixel(ui->xdpy, ui->xscreen ));
 
     mb_stroke_ui_clear_recogniser(ui);
 
@@ -389,13 +392,13 @@ mb_stroke_ui_pentip_draw_point(int x, int y, void *cookie)
 		   0, 0, 
 		   0, 0, 
 		   x, y,
-		   7, 7);
+		   PENTIP_WIDTH, PENTIP_HEIGHT);
   
   XCopyArea(ui->xdpy, 
 	    ui->xwin_pixmap,
 	    ui->xwin,
 	    ui->xgc,
-	    0, 0, ui->xwin_width, ui->xwin_height, 0, 0);
+	    x, y, PENTIP_WIDTH, PENTIP_HEIGHT, x, y);
 
   XFlush(ui->xdpy);
 }
@@ -410,17 +413,17 @@ mb_stroke_ui_pentip_draw_line_to(MBStrokeUI *ui, int x2, int y2)
   if (mb_stroke_stroke_get_last_point(mb_stroke_current_stroke(ui->stroke),
 				      &x1, &y1))
     {
-      DBG("ENTER\n");
       util_bresenham_line(x1, y1, x2, y2,  
 			  &mb_stroke_ui_pentip_draw_point,
 			  (void *)ui);
-      DBG("LEAVE\n");
     }
 }
 
 void
 mb_stroke_ui_stroke_start(MBStrokeUI *ui, int x, int y)
 {
+  mb_stroke_ui_clear_recogniser(ui);
+
   mb_stroke_stroke_new(ui->stroke);
 
   mb_stroke_stroke_append_point(mb_stroke_current_stroke(ui->stroke), 
@@ -459,8 +462,57 @@ mb_stroke_ui_stroke_finish(MBStrokeUI *ui, int x, int y)
       printf("recog failed\n");
     }
 
-  mb_stroke_ui_clear_recogniser(ui);
+
 }
+
+void
+mb_stroke_ui_debug_grid(MBStrokeUI *ui, 
+			int         minx,
+			int         miny,
+			int         maxx,
+			int         maxy,
+			int         bound_x1,
+			int         bound_x2,
+			int         bound_y1,
+			int         bound_y2)
+{
+  XSegment lines[8];
+
+  /* | | | | */
+
+  lines[0].x1 = minx; lines[0].y1 = miny; 
+  lines[0].x2 = minx; lines[0].y2 = maxy; 
+
+  lines[1].x1 = bound_x1; lines[1].y1 = miny; 
+  lines[1].x2 = bound_x1; lines[1].y2 = maxy; 
+
+  lines[2].x1 = bound_x2; lines[2].y1 = miny; 
+  lines[2].x2 = bound_x2; lines[2].y2 = maxy; 
+  
+  lines[3].x1 = maxx; lines[3].y1 = miny;
+  lines[3].x2 = maxx; lines[3].y2 = maxy;
+
+  /* = 
+     =  */
+
+  lines[4].x1 = minx; lines[4].y1 = miny;
+  lines[4].x2 = maxx; lines[4].y2 = miny;
+
+  lines[5].x1 = minx; lines[5].y1 = bound_y1;
+  lines[5].x2 = maxx; lines[5].y2 = bound_y1;
+
+  lines[6].x1 = minx; lines[6].y1 = bound_y2;
+  lines[6].x2 = maxx; lines[6].y2 = bound_y2;
+
+  lines[7].x1 = minx; lines[7].y1 = maxy;
+  lines[7].x2 = maxx; lines[7].y2 = maxy;
+
+  XDrawSegments(ui->xdpy, ui->xwin, ui->xgc, lines, 8);
+
+  XSync(ui->xdpy, False);
+  
+}
+
 
 void
 mb_stroke_ui_event_loop(MBStrokeUI *ui)

@@ -4,11 +4,28 @@
 
     </options>
 
+<!--
+
+   123
+   456
+   789    
+
+-->
+
+
    <!-- global -->
 
    <stroke exact="741269" action="a" />
 
+   <stroke exact="1478965"  action="b" />
+
+   <stroke exact="14789654" action="b" />
+
    <stroke exact="3214789" action="c" />
+
+   <stroke exact="321456654789" action="e" />
+
+   <stroke exact="32147" action="f" />
 
    <stroke exact="1235789" action="z" />
 

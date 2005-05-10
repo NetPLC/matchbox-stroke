@@ -1,3 +1,15 @@
+2005-05-10  mallum,,,  <mallum@openedhand.com>
+
+	* data/strokes.xml:
+	* src/matchbox-stroke-recog.c: (mb_stroke_stroke_trans):
+	* src/matchbox-stroke-ui.c: (mb_stroke_ui_resources_create),
+	(mb_stroke_ui_pentip_draw_point),
+	(mb_stroke_ui_pentip_draw_line_to), (mb_stroke_ui_stroke_finish):
+	* src/matchbox-stroke.h:
+	Update some more strokes.
+	Speed up painting *alot*
+	add some debug graphics for how grid is laid out
+
 2005-05-08  mallum,,,  <mallum@openedhand.com>
 
 	* data/strokes.xml:

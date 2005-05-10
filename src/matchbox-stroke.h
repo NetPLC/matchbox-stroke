@@ -173,6 +173,17 @@ matchbox_stroke_ui_realize(MBStrokeUI *ui);
 int
 matchbox_stroke_ui_init(MBStroke *stroke);
 
+void
+mb_stroke_ui_debug_grid(MBStrokeUI *ui, 
+			int         minx,
+			int         miny,
+			int         maxx,
+			int         maxy,
+			int         bound_x1,
+			int         bound_x2,
+			int         bound_y1,
+			int         bound_y2);
+
 /* Util */
 
 #define streq(a,b)      (strcmp(a,b) == 0)
