@@ -50,6 +50,8 @@ typedef struct MBStroke            MBStroke;
 typedef struct MBStrokeUI          MBStrokeUI;
 typedef struct MBStrokeMode        MBStrokeMode;
 typedef struct MBStrokeAction      MBStrokeAction;
+
+typedef struct MBStrokeRegex       MBStrokeRegex;
 typedef struct MBStrokeStroke      MBStrokeStroke;
 typedef struct MBStrokeStrokePoint MBStrokeStrokePoint;
 
@@ -71,9 +73,6 @@ struct MBStroke
   MBStrokeMode   *modes, *global_mode, *current_mode;
   MBStrokeStroke *current_stroke;
 };
-
-
-
 
 /* stroke */
 
@@ -109,10 +108,14 @@ mb_stroke_mode_add_exact_match(MBStrokeMode   *mode,
 			       const char     *match_str,
 			       MBStrokeAction *action);
 
-MBStrokeAction*
-mb_stroke_mode_find_action(MBStrokeMode   *mode,
-			   char           *match_seq);
+boolean
+mb_stroke_mode_add_fuzzy_match(MBStrokeMode   *mode,
+			       const char     *match_str,
+			       MBStrokeAction *action);
 
+MBStrokeAction*
+mb_stroke_mode_match_seq(MBStrokeMode   *mode,
+			 char           *match_seq);
 
 const char*
 mb_stroke_mode_name(MBStrokeMode   *mode);
@@ -160,6 +163,24 @@ mb_stroke_stroke_trans (MBStrokeStroke *stroke, char *sequence);
 
 MBStrokeStrokePoint*
 mb_stroke_stroke_get_last_point(MBStrokeStroke *stroke, int *x, int *y);
+
+MBStrokeRegex*
+mb_stroke_regex_new(char *regex_str, char **err_msg);
+
+boolean
+mb_stroke_regex_match(MBStrokeRegex *match, char *seq);
+
+MBStrokeRegex*
+mb_stroke_regex_next(MBStrokeRegex *regex);
+
+void
+mb_stroke_regex_set_next(MBStrokeRegex *regex, MBStrokeRegex *next);
+
+void
+mb_stroke_regex_set_action(MBStrokeRegex *regex, MBStrokeAction *action);
+
+MBStrokeAction*
+mb_stroke_regex_get_action(MBStrokeRegex *regex);
 
 
 /* UI */

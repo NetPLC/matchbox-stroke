@@ -1,10 +1,10 @@
 #include "matchbox-stroke.h"
 
+#include <regex.h>		/* for regexp stuff */
+
 /* 
  * Code here very much based on that in libstroke. 
  */
-
-#include <math.h> 		/* for fabs() :/ */
 
 /* largest number of points allowed to be sampled */
 #define STROKE_MAX_POINTS 10000
@@ -302,5 +302,75 @@ mb_stroke_stroke_trans (MBStrokeStroke *stroke, char *sequence)
   return 1;
 }
 
+/* regex stuff */
 
+struct MBStrokeRegex
+{
+  regex_t        *regex;
+  MBStrokeRegex  *next;
+  MBStrokeAction *action;
+};
 
+#define RE_ERR_MSG_LEN 255
+
+MBStrokeRegex*
+mb_stroke_regex_new(char *regex_str, char **err_msg)
+{
+  MBStrokeRegex *reg = NULL;
+  char          *regex_str_complete;
+  int            err;
+
+  reg = util_malloc0(sizeof(MBStrokeRegex));
+
+  regex_str_complete = alloca(strlen(regex_str)+3);
+  sprintf(regex_str_complete, "^%s$", regex_str);
+
+  reg->regex = util_malloc0(sizeof(regex_t));
+
+  err = regcomp(reg->regex, regex_str_complete, REG_EXTENDED | REG_NOSUB);
+
+  if (err) 
+    {
+      if (err_msg != NULL)
+	{
+	  *err_msg = util_malloc0(RE_ERR_MSG_LEN);
+	  regerror(err, reg->regex, *err_msg, RE_ERR_MSG_LEN);
+	}
+
+      free(reg);
+
+      return NULL;
+    }
+
+  return reg;
+}
+
+boolean
+mb_stroke_regex_match(MBStrokeRegex *match, char *seq)
+{
+  return (regexec(match->regex, seq, 0, 0, 0) != REG_NOMATCH);
+} 
+
+MBStrokeRegex*
+mb_stroke_regex_next(MBStrokeRegex *regex)
+{
+  return regex->next;
+}
+
+void
+mb_stroke_regex_set_next(MBStrokeRegex *regex, MBStrokeRegex *next)
+{
+  regex->next = next;
+}
+
+void
+mb_stroke_regex_set_action(MBStrokeRegex *regex, MBStrokeAction *action)
+{
+  regex->action = action;
+}
+
+MBStrokeAction *
+mb_stroke_regex_get_action(MBStrokeRegex *regex)
+{
+  return regex->action;
+}

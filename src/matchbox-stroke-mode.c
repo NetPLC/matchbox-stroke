@@ -1,16 +1,18 @@
 #include "matchbox-stroke.h"
 
+
 struct MBStrokeMode
 {
-  char        *name;
-  UtilHash    *exact_match_actions; 
+  char           *name;
+  UtilHash       *exact_match_actions; 
+  MBStrokeRegex  *fuzzy_matches;
 
   /*
     UtilRegexps *fuzzy_matches;
   */
 
-  MBStroke     *stroke_app;
-  MBStrokeMode *next;
+  MBStroke       *stroke_app;
+  MBStrokeMode  *next;
 };
 
 MBStrokeMode*
@@ -60,14 +62,71 @@ mb_stroke_mode_add_exact_match(MBStrokeMode   *mode,
   util_hash_insert(mode->exact_match_actions, 
 		   strdup(match_str), 
 		   (pointer)action);
+}
 
+boolean
+mb_stroke_mode_add_fuzzy_match(MBStrokeMode   *mode,
+			       const char     *match_str,
+			       MBStrokeAction *action)
+{
+  MBStrokeRegex  *last_match = mode->fuzzy_matches, *new_regex = NULL;
+
+  DBG("Adding fuzzy match for mode:%s, '%s'", mode->name, match_str);
+  
+  if ((new_regex = mb_stroke_regex_new(match_str, NULL)) == NULL)
+    return False; 		/* XXX return error ? */
+
+  mb_stroke_regex_set_action(new_regex, action);
+
+  if (last_match == NULL)
+    {
+      mode->fuzzy_matches = new_regex;
+      return True;
+    }
+  
+  while (mb_stroke_regex_next(last_match) != NULL)
+    last_match = mb_stroke_regex_next(last_match);
+
+  mb_stroke_regex_set_next(last_match, new_regex);
+
+  return True;
 }
 
 MBStrokeAction*
-mb_stroke_mode_find_action(MBStrokeMode   *mode,
-			   char           *match_seq)
+mb_stroke_mode_match_seq(MBStrokeMode   *mode,
+			 char           *match_seq)
 {
-  return util_hash_lookup(mode->exact_match_actions, match_seq);
+  MBStrokeRegex  *reg_item =  mode->fuzzy_matches;
+  MBStrokeAction *action   = NULL;
+
+  action = util_hash_lookup(mode->exact_match_actions, match_seq);
+
+  if (action)
+    return action;
+
+  /* fun bit */
+
+  while (reg_item != NULL)
+    {
+      if (mb_stroke_regex_match(reg_item, match_seq))
+	{
+	  action = mb_stroke_regex_get_action(reg_item);
+
+	  /* cache the seq in the exact hash so we dont need to 
+           * hit the regexps again for this.
+           *
+           * XXX Does it make sense to cache this data on disk or
+           *     some such for the user ?
+	  */
+	  mb_stroke_mode_add_exact_match(mode, match_seq, action);
+
+	  return action;
+	}
+
+      reg_item = mb_stroke_regex_next(reg_item);
+    }
+
+  return NULL;
 }
 
 const char*

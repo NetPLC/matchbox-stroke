@@ -1,3 +1,18 @@
+2005-05-12  mallum,,,  <mallum@openedhand.com>
+
+	* Makefile.am:
+	* configure.ac:
+	* data/Makefile.am:
+	Make sure strokes.xml is now installed	
+	* data/strokes.xml:
+	Update a little with a few test sloppy strokes
+	* src/config-parser.c: (config_handle_stroke_tag):
+	* src/matchbox-stroke-mode.c: (mb_stroke_mode_add_exact_match):
+	* src/matchbox-stroke-recog.c: (mb_stroke_stroke_trans):
+	* src/matchbox-stroke-ui.c: (mb_stroke_ui_stroke_finish):
+	* src/matchbox-stroke.h:
+	Implement sloppy ( regex ) based fallback matching
+
 2005-05-10  mallum,,,  <mallum@openedhand.com>
 
 	* data/strokes.xml:

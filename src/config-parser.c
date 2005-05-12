@@ -264,7 +264,7 @@ static void
 config_handle_stroke_tag(MBStrokeConfigState *state, const char **attr)
 {
   MBStrokeAction *action = NULL;
-  const char     *val = NULL, *exact = NULL; /* , *sloppy_match = NULL; */
+  const char     *val = NULL, *exact = NULL, *sloppy = NULL;
   KeySym          found_keysym;
 
   /* action */
@@ -350,11 +350,13 @@ config_handle_stroke_tag(MBStrokeConfigState *state, const char **attr)
       return;
     }
 
-  
   mb_stroke_mode_add_exact_match(state->current_mode, exact, action);
+  
+  sloppy = attr_get_val("sloppy", attr);
 
-
-  /*  */
+  if (sloppy)
+    mb_stroke_mode_add_fuzzy_match(state->current_mode, sloppy, action);
+  
 }
 
 

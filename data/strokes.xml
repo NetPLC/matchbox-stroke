@@ -15,13 +15,17 @@
 
    <!-- global -->
 
-   <stroke exact="741269" action="a" />
+   <stroke exact="654" action="backspace"  />
 
-   <stroke exact="1478965"  action="b" />
+   <stroke exact="357" sloppy="3[26]?5[48]?7?" action="return"  />
+
+   <stroke exact="741269" action="a" sloppy="" />
+
+   <stroke exact="1478965"  action="b" sloppy="" />
 
    <stroke exact="14789654" action="b" />
 
-   <stroke exact="3214789" action="c" />
+   <stroke exact="3214789" sloppy="6?3?2[15]?47?[58]8?9?6?" action="c" />
 
    <stroke exact="321456654789" action="e" />
 
