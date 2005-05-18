@@ -135,9 +135,9 @@ mb_stroke_mode_name(MBStrokeMode   *mode)
   return mode->name;
 }
 
-
 MBStrokeMode*
 mb_stroke_mode_next(MBStrokeMode   *mode)
 {
   return mode->next;
 }
+

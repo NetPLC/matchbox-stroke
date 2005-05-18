@@ -123,6 +123,7 @@ mb_stroke_mode_name(MBStrokeMode   *mode);
 MBStrokeMode*
 mb_stroke_mode_next(MBStrokeMode   *mode);
 
+
 /* actions */
 
 MBStrokeAction*
@@ -135,10 +136,6 @@ void
 mb_stroke_action_set_as_utf8char(MBStrokeAction      *action,
 				 const unsigned char *utf8char);
 
-
-unsigned char*
-mb_stroke_action_get_utf8char(MBStrokeAction *action);
-
 void
 mb_stroke_action_set_as_keysym(MBStrokeAction *action ,
 			       KeySym          keysym);
@@ -146,6 +143,9 @@ mb_stroke_action_set_as_keysym(MBStrokeAction *action ,
 void
 mb_stroke_action_set_as_mode_switch(MBStrokeAction *action,
 				    char           *mode_name);
+
+void
+mb_stroke_action_execute(MBStrokeAction *action);
 
 /* Recogniser */
 
@@ -186,6 +186,14 @@ mb_stroke_regex_get_action(MBStrokeRegex *regex);
 /* UI */
 
 void
+mb_stroke_ui_key_press_release(MBStrokeUI          *ui,
+			       const unsigned char *utf8_char_in,
+			       int                  modifiers);
+void
+mb_kbd_ui_keysym_press_release(MBStrokeUI  *ui,
+			       KeySym       ks,
+			       int          modifiers);
+void
 mb_stroke_ui_event_loop(MBStrokeUI *ui);
 
 int
@@ -193,6 +201,12 @@ matchbox_stroke_ui_realize(MBStrokeUI *ui);
 
 int
 matchbox_stroke_ui_init(MBStroke *stroke);
+
+int
+mb_stroke_ui_display_width(MBStrokeUI *ui);
+
+int
+mb_stroke_ui_display_height(MBStrokeUI *ui);
 
 void
 mb_stroke_ui_debug_grid(MBStrokeUI *ui, 

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Stroke Recogniser
+Comment=Stroke Recogniser
+Exec=matchbox-stroke
+Type=Application
+Icon=matchbox-stroke.png
+Categories=Panel;Utility;MB
+X-MB-INPUT-MECHANSIM=True

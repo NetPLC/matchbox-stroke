@@ -28,6 +28,8 @@ struct MBStrokeUI
   XftFont      *font;
   XftColor      font_col; 
 
+  int           fade_cnt;
+
   /* unused ? */
 
   XftDraw      *xft_backbuffer;  
@@ -60,7 +62,7 @@ static struct {
 
 
 static void
-mb_stroke_ui_clear_recogniser(MBStrokeUI *ui);
+mb_stroke_ui_clear_recogniser(MBStrokeUI *ui, int alpha);
 
 
 /* Fix byte order as it comes from the GIMP, and pre-multiply
@@ -92,6 +94,39 @@ fix_image(unsigned char *image, int npixels)
 	image[i*4 + 2] = b;
 	image[i*4 + 3] = a;
     }
+}
+
+static boolean
+get_desktop_area(MBStrokeUI *ui, int *x, int *y, int *width, int *height)
+{
+  Atom           atom_area, type;
+  int            result, format;
+  long           nitems, bytes_after;
+  int           *geometry = NULL;
+
+  atom_area = XInternAtom (ui->xdpy, "_NET_WORKAREA", False);
+
+  result = XGetWindowProperty (ui->xdpy, 
+			       RootWindow(ui->xdpy, ui->xscreen),
+			       atom_area,
+			       0, 16L, False, XA_CARDINAL, &type, &format,
+			       &nitems, &bytes_after, 
+			       (unsigned char **)&geometry);
+
+  if (result != Success || nitems < 4 || geometry == NULL)
+    {
+      if (geometry) XFree(geometry);
+      return False;
+    }
+
+  if (x) *x           = geometry[0];
+  if (y) *y           = geometry[1];
+  if (width)  *width  = geometry[2];
+  if (height) *height = geometry[3];
+  
+  XFree(geometry);
+
+  return True;
 }
 
 
@@ -227,20 +262,17 @@ mb_stroke_ui_resources_create(MBStrokeUI  *ui)
     atom_NET_WM_WINDOW_TYPE_TOOLBAR,
     atom_NET_WM_WINDOW_TYPE_DOCK,
     atom_NET_WM_STRUT_PARTIAL,
+    atom_NET_WM_STATE_SKIP_PAGER,
     atom_NET_WM_STATE_SKIP_TASKBAR,
     atom_NET_WM_STATE,
     atom_MOTIF_WM_HINTS;
   
-
-  /*
   PropMotifWmHints    *mwm_hints;
   XSizeHints           size_hints;
-  XRenderColor         coltmp;
   XWMHints            *wm_hints;
-  */
 
   XSetWindowAttributes win_attr;
-
+  int                  desk_width = 0, desk_height = 0;
 
 
   /*
@@ -268,6 +300,9 @@ mb_stroke_ui_resources_create(MBStrokeUI  *ui)
   atom_NET_WM_STATE_SKIP_TASKBAR =
     XInternAtom(ui->xdpy, "_NET_WM_STATE_SKIP_TASKBAR", False);
 
+  atom_NET_WM_STATE_SKIP_PAGER = 
+    XInternAtom(ui->xdpy, "_NET_WM_STATE_SKIP_PAGER", False);
+
   atom_NET_WM_STATE =
     XInternAtom(ui->xdpy, "_NET_WM_STATE", False);
 
@@ -276,6 +311,17 @@ mb_stroke_ui_resources_create(MBStrokeUI  *ui)
   win_attr.event_mask 
     = ButtonPressMask|ButtonReleaseMask|Button1MotionMask|
     StructureNotifyMask|ExposureMask;
+
+  ui->xwin_width  = mb_stroke_ui_display_width(ui);
+  ui->xwin_height = mb_stroke_ui_display_height(ui) / 3;
+
+  /* below assumes non fullscreen */
+
+  if (get_desktop_area(ui, NULL, NULL, &desk_width, &desk_height))
+    {
+      ui->xwin_width = desk_width;
+      ui->xwin_height = desk_height / 3;
+    }
 
   ui->xwin = XCreateWindow(ui->xdpy,
 			   ui->xwin_root,
@@ -286,7 +332,13 @@ mb_stroke_ui_resources_create(MBStrokeUI  *ui)
 			   CWOverrideRedirect|CWEventMask,
 			   &win_attr);
 
-#if 0
+  /* again assumes mb and non fullscreen */
+
+  XChangeProperty(ui->xdpy, ui->xwin, 
+		  atom_NET_WM_WINDOW_TYPE, XA_ATOM, 32, 
+		  PropModeReplace, 
+		  (unsigned char *) &atom_NET_WM_WINDOW_TYPE_TOOLBAR, 1);
+
   wm_hints = XAllocWMHints();
 
   if (wm_hints)
@@ -324,50 +376,60 @@ mb_stroke_ui_resources_create(MBStrokeUI  *ui)
       free(mwm_hints);
     }
 
-#endif
+  {
+    Atom states[] = { atom_NET_WM_STATE_SKIP_TASKBAR, 
+		      atom_NET_WM_STATE_SKIP_PAGER };
 
-    ui->xwin_format 
-      = XRenderFindVisualFormat(ui->xdpy,DefaultVisual(ui->xdpy, ui->xscreen));
+    XChangeProperty(ui->xdpy, ui->xwin, 
+		    atom_NET_WM_STATE, XA_ATOM, 32, 
+		    PropModeReplace, 
+		    (unsigned char *)states, 2);
+  }
 
-    ui->xwin_pixmap = XCreatePixmap(ui->xdpy, ui->xwin,
-				    ui->xwin_width,
-				    ui->xwin_height,
-				    DefaultDepth(ui->xdpy, ui->xscreen));
+  /* drawables etc  */
 
-    /* attr.subwindow_mode = IncludeInferiors; */
+  ui->xwin_format 
+    = XRenderFindVisualFormat(ui->xdpy,DefaultVisual(ui->xdpy, ui->xscreen));
+  
+  ui->xwin_pixmap = XCreatePixmap(ui->xdpy, ui->xwin,
+				  ui->xwin_width,
+				  ui->xwin_height,
+				  DefaultDepth(ui->xdpy, ui->xscreen));
+  
+  /* attr.subwindow_mode = IncludeInferiors; */
 
-    ui->xwin_pict = XRenderCreatePicture(ui->xdpy, ui->xwin_pixmap, 
-					 ui->xwin_format,
-					 0 /* CPSubwindowMode */, NULL);
+  ui->xwin_pict = XRenderCreatePicture(ui->xdpy, ui->xwin_pixmap, 
+				       ui->xwin_format,
+				       0 /* CPSubwindowMode */, NULL);
+  
+  init_pentip_image(ui);  
 
-    init_pentip_image(ui);  
-
-    ui->xgc = XCreateGC(ui->xdpy, ui->xwin, 0, NULL);
-
-    XSetBackground(ui->xdpy, ui->xgc, WhitePixel(ui->xdpy, ui->xscreen ));
-    XSetForeground(ui->xdpy, ui->xgc, BlackPixel(ui->xdpy, ui->xscreen ));
-
-    mb_stroke_ui_clear_recogniser(ui);
-
-    
-    return 1;
+  ui->xgc = XCreateGC(ui->xdpy, ui->xwin, 0, NULL);
+  
+  XSetBackground(ui->xdpy, ui->xgc, WhitePixel(ui->xdpy, ui->xscreen ));
+  XSetForeground(ui->xdpy, ui->xgc, BlackPixel(ui->xdpy, ui->xscreen ));
+  
+  mb_stroke_ui_clear_recogniser(ui, 0xffff);
+  
+  return 1;
 }
 
 
 static void
-mb_stroke_ui_clear_recogniser(MBStrokeUI *ui)
+mb_stroke_ui_clear_recogniser(MBStrokeUI *ui, int alpha)
 {
   XRenderColor color;
 
-  color.red = color.green = color.blue = color.alpha = 0xffff;
+  color.red = color.green = color.blue = color.alpha = alpha;
 
   XRenderFillRectangle(ui->xdpy,
-		       PictOpSrc, 
+		       PictOpOver, 
 		       ui->xwin_pict, 
 		       &color,
 		       0, 0, 
 		       ui->xwin_width, 
 		       ui->xwin_height);
+
 
   XCopyArea(ui->xdpy, 
 	    ui->xwin_pixmap,
@@ -422,7 +484,9 @@ mb_stroke_ui_pentip_draw_line_to(MBStrokeUI *ui, int x2, int y2)
 void
 mb_stroke_ui_stroke_start(MBStrokeUI *ui, int x, int y)
 {
-  mb_stroke_ui_clear_recogniser(ui);
+  // mb_stroke_ui_clear_recogniser(ui, 0x9999);
+
+
 
   mb_stroke_stroke_new(ui->stroke);
 
@@ -452,16 +516,21 @@ mb_stroke_ui_stroke_finish(MBStrokeUI *ui, int x, int y)
   if (mb_stroke_stroke_trans (mb_stroke_current_stroke(ui->stroke), 
 			      &recog[0]))
     {
+      MBStrokeAction *action = NULL;
+
       printf("got '%s'\n", recog);
-      if (mb_stroke_mode_match_seq(mb_stroke_current_mode(ui->stroke), recog))
-	printf("MATCHED!\n");
+
+      action = mb_stroke_mode_match_seq(mb_stroke_current_mode(ui->stroke), 
+					recog);
+      if (action)
+	mb_stroke_action_execute(action);
     }
   else
     {
       printf("recog failed\n");
     }
 
-
+  ui->fade_cnt = 5;
 }
 
 void
@@ -475,6 +544,8 @@ mb_stroke_ui_debug_grid(MBStrokeUI *ui,
 			int         bound_y1,
 			int         bound_y2)
 {
+#if WANT_DEBUG
+
   XSegment lines[8];
 
   /* | | | | */
@@ -509,7 +580,27 @@ mb_stroke_ui_debug_grid(MBStrokeUI *ui,
   XDrawSegments(ui->xdpy, ui->xwin, ui->xgc, lines, 8);
 
   XSync(ui->xdpy, False);
-  
+ 
+#endif 
+}
+
+void
+mb_stroke_ui_key_press_release(MBStrokeUI          *ui,
+			       const unsigned char *utf8_char_in,
+			       int                  modifiers)
+{
+  DBG("Sending '%s'", utf8_char_in);
+  fakekey_press(ui->fakekey, utf8_char_in, -1, modifiers);
+  fakekey_release(ui->fakekey);
+}
+
+void
+mb_kbd_ui_keysym_press_release(MBStrokeUI  *ui,
+			       KeySym       ks,
+			       int          modifiers)
+{
+  fakekey_press_keysym(ui->fakekey, ks, modifiers);
+  fakekey_release(ui->fakekey);
 }
 
 
@@ -525,6 +616,11 @@ mb_stroke_ui_event_loop(MBStrokeUI *ui)
   while (True)
       {
 	XEvent xev;
+
+	if (ui->fade_cnt)
+	  tvt.tv_usec = 50;
+	else
+	  tvt.tv_usec = 0;
 
 	if (get_xevent_timed(ui->xdpy, &xev, &tvt))
 	  {
@@ -563,7 +659,11 @@ mb_stroke_ui_event_loop(MBStrokeUI *ui)
 	  }
 	else
 	  {
-	    ; /* Nothing yet */
+	    if (ui->fade_cnt)
+	      {
+		mb_stroke_ui_clear_recogniser(ui, 0x9999);
+		ui->fade_cnt--;
+	      }
 	  }
       }
 }
@@ -608,8 +708,6 @@ matchbox_stroke_ui_init(MBStroke *stroke)
   ui->stroke      = stroke;
   ui->xscreen     = DefaultScreen(ui->xdpy);
   ui->xwin_root   = RootWindow(ui->xdpy, ui->xscreen);   
-  ui->xwin_width  = 320;
-  ui->xwin_height = 320;
 
   return 1;
 }

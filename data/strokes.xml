@@ -11,21 +11,60 @@
    789    
 
 -->
-
-
    <!-- global -->
 
    <stroke exact="654" action="backspace"  />
 
    <stroke exact="357" sloppy="3[26]?5[48]?7?" action="return"  />
 
-   <stroke exact="741269" action="a" sloppy="" />
+   <stroke exact="741269" 
+          sloppy="[78]?[45]5?1?(23?[56]6?|4?5)8?9?8?" 
+          action="a"  />
 
-   <stroke exact="1478965"  action="b" sloppy="" />
+   <stroke exact="147458" 
+           sloppy="[21][21]?[54]4?[78]+4?8?58?[69]9?87?4?" 
+	   action="b"/>
 
-   <stroke exact="14789654" action="b" />
+   <stroke exact="3214789" 
+	   sloppy="6?3?2[15]?47?[58]8?9?6?" 
+	   action="c" />
 
-   <stroke exact="3214789" sloppy="6?3?2[15]?47?[58]8?9?6?" action="c" />
+   <stroke exact="36965478"
+	   sloppy="(3?6(56)?|26?5(6[89]+)?|23?6?9)[89]*[658]*[32]*[254]+[47]7?89?6?"
+	   action="d" />
+
+   <stroke exact="321456654789"
+	   sloppy="[36]?[25][147]+|[36][215][147]*)([147]+[258]+([36]?[258]*|9[658]+)[147]+|[258]*([36]+[25]+|9[658]+)[147]*)([147]*8[96]6?|[147]+8[96]*)"
+	   action="e" />
+
+   <stroke exact="74123"
+	   sloppy="741?23"
+	   action="f" />
+
+   <stroke exact="32145636987"
+	   sloppy="3?21?2?[45]1?[256]+[32]+[56]+(98?7?|87)4?"
+	   action="g" />
+
+
+   <stroke exact="1474569"
+	   sloppy="[12]1?47[478]*[56][68]?9?"
+	   action="h" />
+
+   <stroke exact=""
+	   sloppy=""
+	   action="" />
+
+   <stroke exact=""
+	   sloppy=""
+	   action="" />
+
+   <stroke exact=""
+	   sloppy=""
+	   action="" />
+
+   <stroke exact=""
+	   sloppy=""
+	   action="" />
 
    <stroke exact="321456654789" action="e" />
 

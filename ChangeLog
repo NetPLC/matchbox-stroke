@@ -1,3 +1,30 @@
+2005-05-18  mallum,,,  <mallum@openedhand.com>
+
+	* Makefile.am:
+	* matchbox-stroke.desktop:
+	Add desktop file
+
+	* data/strokes.xml:
+	Experiment with adding a few new strokes ( thanks koen )
+
+	* src/matchbox-stroke-action.c: (mb_stroke_action_set_as_utf8char),
+	(mb_stroke_action_set_as_keysym):
+	* src/matchbox-stroke-mode.c: (mb_stroke_mode_name):
+	* src/matchbox-stroke-ui.c: (fix_image), (init_pentip_image),
+	(mb_stroke_ui_show), (mb_stroke_ui_resources_create),
+	(mb_stroke_ui_clear_recogniser), (mb_stroke_ui_pentip_draw_point),
+	(mb_stroke_ui_pentip_draw_line_to), (mb_stroke_ui_stroke_start),
+	(mb_stroke_ui_stroke_update), (mb_stroke_ui_stroke_finish),
+	(mb_stroke_ui_debug_grid), (mb_stroke_ui_key_press_release),
+	(mb_kbd_ui_keysym_press_release), (mb_stroke_ui_event_loop),
+	(mb_stroke_ui_display_width), (mb_stroke_ui_display_height),
+	(matchbox_stroke_ui_realize), (matchbox_stroke_ui_init):
+	* src/matchbox-stroke.h:
+	Actually now send events.
+	Set window up correctly ( for matchbox at least ).
+	Add a fade effect ( possibly to slow )
+	Other misc tweaks too.
+
 2005-05-12  mallum,,,  <mallum@openedhand.com>
 
 	* Makefile.am:
