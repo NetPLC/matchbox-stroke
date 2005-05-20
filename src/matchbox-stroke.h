@@ -66,10 +66,18 @@ typedef enum
 
 } MBStrokeActionType;
 
+typedef enum 
+{
+  MBStrokeUIModeInputWin,
+  MBStrokeUIModeFullscreen
+
+} MBStrokeUIMode;
+
 
 struct MBStroke
 {
   MBStrokeUI     *ui;
+  MBStrokeUIMode  ui_mode;
   MBStrokeMode   *modes, *global_mode, *current_mode;
   MBStrokeStroke *current_stroke;
 };

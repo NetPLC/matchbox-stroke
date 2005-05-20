@@ -17,16 +17,20 @@ struct MBStrokeUI
   Picture            xwin_pict;
   XRenderPictFormat *xwin_format;
 
+  Pixmap             root_pixmap_orig;
+
   Pixmap             pentip_pixmap;
   Picture            pentip_pict;
   XRenderPictFormat *pentip_format;
 
 
-  FakeKey      *fakekey;
-  MBStroke     *stroke;
+  FakeKey           *fakekey;
+  MBStroke          *stroke;
 
-  XftFont      *font;
-  XftColor      font_col; 
+  XftFont           *font;
+  XftColor           font_col; 
+
+  MBStrokeUIMode     mode;
 
   int           fade_cnt;
 
@@ -36,6 +40,8 @@ struct MBStrokeUI
   Pixmap        backbuffer;
   GC            xgc;
 };
+
+#define UI_WANT_FULLSCREEN(u) ((u)->mode == MBStrokeUIModeFullscreen)
 
 static struct {
   unsigned int   width;
@@ -94,6 +100,16 @@ fix_image(unsigned char *image, int npixels)
 	image[i*4 + 2] = b;
 	image[i*4 + 3] = a;
     }
+}
+
+static int 
+handle_xerror(Display *dpy, XErrorEvent *e)
+{
+  char msg[255];
+  XGetErrorText(dpy, e->error_code, msg, sizeof msg);
+  fprintf(stderr, "matchbox-stroke: X error warning (%#lx): %s (opcode: %i)\n",
+		e->resourceid, msg, e->request_code);
+  return 0;
 }
 
 static boolean
@@ -312,104 +328,168 @@ mb_stroke_ui_resources_create(MBStrokeUI  *ui)
     = ButtonPressMask|ButtonReleaseMask|Button1MotionMask|
     StructureNotifyMask|ExposureMask;
 
-  ui->xwin_width  = mb_stroke_ui_display_width(ui);
-  ui->xwin_height = mb_stroke_ui_display_height(ui) / 3;
-
-  /* below assumes non fullscreen */
-
-  if (get_desktop_area(ui, NULL, NULL, &desk_width, &desk_height))
+  if (UI_WANT_FULLSCREEN(ui))
     {
-      ui->xwin_width = desk_width;
-      ui->xwin_height = desk_height / 3;
+      /* fullscreen, just re-use the rootwin */
+
+      ui->xwin_width  = mb_stroke_ui_display_width(ui);
+      ui->xwin_height = mb_stroke_ui_display_height(ui);
+      ui->xwin        = ui->xwin_root;
+
+      if (XGrabPointer(ui->xdpy, ui->xwin_root, False,
+		       ButtonPressMask|ButtonReleaseMask|Button1MotionMask,
+		       GrabModeAsync,
+		       GrabModeAsync, 
+		       None, None, CurrentTime) == GrabSuccess)
+	printf("got grab");
+
     }
-
-  ui->xwin = XCreateWindow(ui->xdpy,
-			   ui->xwin_root,
-			   0, 0,
-			   ui->xwin_width, ui->xwin_height,
-			   0,
-			   CopyFromParent, CopyFromParent, CopyFromParent,
-			   CWOverrideRedirect|CWEventMask,
-			   &win_attr);
-
-  /* again assumes mb and non fullscreen */
-
-  XChangeProperty(ui->xdpy, ui->xwin, 
-		  atom_NET_WM_WINDOW_TYPE, XA_ATOM, 32, 
-		  PropModeReplace, 
-		  (unsigned char *) &atom_NET_WM_WINDOW_TYPE_TOOLBAR, 1);
-
-  wm_hints = XAllocWMHints();
-
-  if (wm_hints)
+  else
     {
-      DBG("setting no focus hint");
-      wm_hints->input = False;
-      wm_hints->flags = InputHint;
-      XSetWMHints(ui->xdpy, ui->xwin, wm_hints );
-      XFree(wm_hints);
-    }
+      ui->xwin_width  = mb_stroke_ui_display_width(ui);
+      ui->xwin_height = mb_stroke_ui_display_height(ui) / 3;
 
-  size_hints.flags = PPosition | PSize | PMinSize;
-  size_hints.x = 0;
-  size_hints.y = 0;
-  size_hints.width      =  ui->xwin_width; 
-  size_hints.height     =  ui->xwin_height;
-  size_hints.min_width  =  ui->xwin_width;
-  size_hints.min_height =  ui->xwin_height;
-    
-  XSetStandardProperties(ui->xdpy, ui->xwin, "Keyboard", 
-			 NULL, 0, NULL, 0, &size_hints);
+      /* below assumes non fullscreen */
 
-  mwm_hints = util_malloc0(sizeof(PropMotifWmHints));
+      if (get_desktop_area(ui, NULL, NULL, &desk_width, &desk_height))
+	{
+	  ui->xwin_width = desk_width;
+	  ui->xwin_height = desk_height / 3;
+	}
+
+      ui->xwin = XCreateWindow(ui->xdpy,
+			       ui->xwin_root,
+			       0, 0,
+			       ui->xwin_width, ui->xwin_height,
+			       0,
+			       CopyFromParent, CopyFromParent, CopyFromParent,
+			       CWOverrideRedirect|CWEventMask,
+			       &win_attr);
+
+      /* again assumes mb and non fullscreen */
+
+      XChangeProperty(ui->xdpy, ui->xwin, 
+		      atom_NET_WM_WINDOW_TYPE, XA_ATOM, 32, 
+		      PropModeReplace, 
+		      (unsigned char *) &atom_NET_WM_WINDOW_TYPE_TOOLBAR, 1);
+
+      
+      wm_hints = XAllocWMHints();
+      
+      if (wm_hints)
+	{
+	  DBG("setting no focus hint");
+	  wm_hints->input = False;
+	  wm_hints->flags = InputHint;
+	  XSetWMHints(ui->xdpy, ui->xwin, wm_hints );
+	  XFree(wm_hints);
+	}
+      
+      size_hints.flags = PPosition | PSize | PMinSize;
+      size_hints.x = 0;
+      size_hints.y = 0;
+      size_hints.width      =  ui->xwin_width; 
+      size_hints.height     =  ui->xwin_height;
+      size_hints.min_width  =  ui->xwin_width;
+      size_hints.min_height =  ui->xwin_height;
+      
+      XSetStandardProperties(ui->xdpy, ui->xwin, "Keyboard", 
+			     NULL, 0, NULL, 0, &size_hints);
+      
+      mwm_hints = util_malloc0(sizeof(PropMotifWmHints));
   
-  if (mwm_hints)
-    {
-      mwm_hints->flags = MWM_HINTS_DECORATIONS;
-      mwm_hints->decorations = 0;
-
-      XChangeProperty(ui->xdpy, ui->xwin, atom_MOTIF_WM_HINTS, 
-		      XA_ATOM, 32, PropModeReplace, 
-		      (unsigned char *)mwm_hints, 
-		      PROP_MOTIF_WM_HINTS_ELEMENTS);
-
-      free(mwm_hints);
+      if (mwm_hints)
+	{
+	  mwm_hints->flags = MWM_HINTS_DECORATIONS;
+	  mwm_hints->decorations = 0;
+	  
+	  XChangeProperty(ui->xdpy, ui->xwin, atom_MOTIF_WM_HINTS, 
+			  XA_ATOM, 32, PropModeReplace, 
+			  (unsigned char *)mwm_hints, 
+			  PROP_MOTIF_WM_HINTS_ELEMENTS);
+	  
+	  free(mwm_hints);
+	}
+      
+      {
+	Atom states[] = { atom_NET_WM_STATE_SKIP_TASKBAR, 
+			  atom_NET_WM_STATE_SKIP_PAGER };
+	
+	XChangeProperty(ui->xdpy, ui->xwin, 
+			atom_NET_WM_STATE, XA_ATOM, 32, 
+			PropModeReplace, 
+			(unsigned char *)states, 2);
+      }
     }
-
-  {
-    Atom states[] = { atom_NET_WM_STATE_SKIP_TASKBAR, 
-		      atom_NET_WM_STATE_SKIP_PAGER };
-
-    XChangeProperty(ui->xdpy, ui->xwin, 
-		    atom_NET_WM_STATE, XA_ATOM, 32, 
-		    PropModeReplace, 
-		    (unsigned char *)states, 2);
-  }
 
   /* drawables etc  */
 
   ui->xwin_format 
     = XRenderFindVisualFormat(ui->xdpy,DefaultVisual(ui->xdpy, ui->xscreen));
-  
+
   ui->xwin_pixmap = XCreatePixmap(ui->xdpy, ui->xwin,
 				  ui->xwin_width,
 				  ui->xwin_height,
 				  DefaultDepth(ui->xdpy, ui->xscreen));
-  
-  /* attr.subwindow_mode = IncludeInferiors; */
 
-  ui->xwin_pict = XRenderCreatePicture(ui->xdpy, ui->xwin_pixmap, 
-				       ui->xwin_format,
-				       0 /* CPSubwindowMode */, NULL);
+  
+
+  if (UI_WANT_FULLSCREEN(ui))
+    {
+      XRenderPictureAttributes attr;
+
+      attr.subwindow_mode = IncludeInferiors; 
+
+      ui->xwin_pict = XRenderCreatePicture(ui->xdpy, ui->xwin_pixmap, 
+					   ui->xwin_format,
+					   CPSubwindowMode, &attr);
+    }
+  else
+    ui->xwin_pict = XRenderCreatePicture(ui->xdpy, ui->xwin_pixmap, 
+					 ui->xwin_format,
+					 0, NULL);
   
   init_pentip_image(ui);  
 
-  ui->xgc = XCreateGC(ui->xdpy, ui->xwin, 0, NULL);
+  if (UI_WANT_FULLSCREEN(ui))
+    {
+      unsigned long gcm;
+      XGCValues     gcv;
+
+      gcm                = GCSubwindowMode; 
+      gcv.subwindow_mode = IncludeInferiors;
+
+      ui->xgc = XCreateGC(ui->xdpy, ui->xwin, gcm, &gcv);
+
+      /* XXX backup to root window - need to this before every stroke */
+
+      ui->root_pixmap_orig = XCreatePixmap(ui->xdpy, ui->xwin,
+					   ui->xwin_width,
+					   ui->xwin_height,
+					   DefaultDepth(ui->xdpy, ui->xscreen));
+      XCopyArea(ui->xdpy, 
+		ui->xwin,
+		ui->root_pixmap_orig,
+		ui->xgc,
+		0, 0, ui->xwin_width, ui->xwin_height, 0, 0);
+
+      XCopyArea(ui->xdpy, 
+		ui->xwin,
+		ui->xwin_pixmap,
+		ui->xgc,
+		0, 0, ui->xwin_width, ui->xwin_height, 0, 0);
+
+
+    }
+  else
+    {
+      ui->xgc = XCreateGC(ui->xdpy, ui->xwin, 0, NULL);
   
-  XSetBackground(ui->xdpy, ui->xgc, WhitePixel(ui->xdpy, ui->xscreen ));
-  XSetForeground(ui->xdpy, ui->xgc, BlackPixel(ui->xdpy, ui->xscreen ));
+      XSetBackground(ui->xdpy, ui->xgc, WhitePixel(ui->xdpy, ui->xscreen ));
+      XSetForeground(ui->xdpy, ui->xgc, BlackPixel(ui->xdpy, ui->xscreen ));
   
-  mb_stroke_ui_clear_recogniser(ui, 0xffff);
+      mb_stroke_ui_clear_recogniser(ui, 0xffff);
+    }
   
   return 1;
 }
@@ -422,20 +502,30 @@ mb_stroke_ui_clear_recogniser(MBStrokeUI *ui, int alpha)
 
   color.red = color.green = color.blue = color.alpha = alpha;
 
-  XRenderFillRectangle(ui->xdpy,
-		       PictOpOver, 
-		       ui->xwin_pict, 
-		       &color,
-		       0, 0, 
-		       ui->xwin_width, 
-		       ui->xwin_height);
+  if (UI_WANT_FULLSCREEN(ui))
+    {
+      XCopyArea(ui->xdpy, 
+		ui->root_pixmap_orig,
+		ui->xwin,
+		ui->xgc,
+		0, 0, ui->xwin_width, ui->xwin_height, 0, 0);
+    }
+  else
+    {
+      XRenderFillRectangle(ui->xdpy,
+			   PictOpOver, 
+			   ui->xwin_pict, 
+			   &color,
+			   0, 0, 
+			   ui->xwin_width, 
+			   ui->xwin_height);
 
-
-  XCopyArea(ui->xdpy, 
-	    ui->xwin_pixmap,
-	    ui->xwin,
-	    ui->xgc,
-	    0, 0, ui->xwin_width, ui->xwin_height, 0, 0);
+      XCopyArea(ui->xdpy, 
+		ui->xwin_pixmap,
+		ui->xwin, 
+		ui->xgc,
+		0, 0, ui->xwin_width, ui->xwin_height, 0, 0);
+    }
 
   XFlush(ui->xdpy);
 }
@@ -455,7 +545,7 @@ mb_stroke_ui_pentip_draw_point(int x, int y, void *cookie)
 		   0, 0, 
 		   x, y,
 		   PENTIP_WIDTH, PENTIP_HEIGHT);
-  
+
   XCopyArea(ui->xdpy, 
 	    ui->xwin_pixmap,
 	    ui->xwin,
@@ -520,6 +610,12 @@ mb_stroke_ui_stroke_finish(MBStrokeUI *ui, int x, int y)
 
       printf("got '%s'\n", recog);
 
+      if (UI_WANT_FULLSCREEN(ui))
+	{
+	  XUngrabPointer(ui->xdpy, CurrentTime); 
+	  mb_stroke_ui_clear_recogniser(ui, 0xffff);
+	}
+
       action = mb_stroke_mode_match_seq(mb_stroke_current_mode(ui->stroke), 
 					recog);
       if (action)
@@ -531,6 +627,8 @@ mb_stroke_ui_stroke_finish(MBStrokeUI *ui, int x, int y)
     }
 
   ui->fade_cnt = 5;
+
+
 }
 
 void
@@ -617,7 +715,7 @@ mb_stroke_ui_event_loop(MBStrokeUI *ui)
       {
 	XEvent xev;
 
-	if (ui->fade_cnt)
+	if (ui->fade_cnt && !UI_WANT_FULLSCREEN(ui))
 	  tvt.tv_usec = 50;
 	else
 	  tvt.tv_usec = 0;
@@ -702,12 +800,24 @@ matchbox_stroke_ui_init(MBStroke *stroke)
   if ((ui->xdpy = XOpenDisplay(getenv("DISPLAY"))) == NULL)
     return 0;
 
+   if (getenv("MB_SYNC"))
+     {
+       XSynchronize (ui->xdpy, True);
+       XSetErrorHandler(handle_xerror); 
+     }
+
   if ((ui->fakekey = fakekey_init(ui->xdpy)) == NULL)
     return 0;
+
 
   ui->stroke      = stroke;
   ui->xscreen     = DefaultScreen(ui->xdpy);
   ui->xwin_root   = RootWindow(ui->xdpy, ui->xscreen);   
+
+  ui->dpy_width  = DisplayWidth(ui->xdpy, ui->xscreen);
+  ui->dpy_height = DisplayHeight(ui->xdpy, ui->xscreen);
+
+  ui->mode        = stroke->ui_mode;
 
   return 1;
 }

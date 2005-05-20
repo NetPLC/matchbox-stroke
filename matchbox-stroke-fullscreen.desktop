@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Fullscreen Stroke Recogniser 
+Comment=Fullscreen Stroke Recogniser
+Exec=matchbox-stroke --fullscreen
+Type=Application
+Icon=matchbox-stroke-fullscreen.png
+Categories=Panel;Utility;MB
+X-MB-INPUT-MECHANSIM=True

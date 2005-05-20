@@ -36,11 +36,22 @@ mb_stroke_global_mode(MBStroke     *stroke)
 }
 
 MBStroke*
-mb_stroke_app_new(int *argc, char ***argv)
+mb_stroke_app_new(int argc, char **argv)
 {
   MBStroke *stroke = NULL;
+  int       i;
 
   stroke = util_malloc0(sizeof(MBStroke));
+
+  stroke->ui_mode = MBStrokeUIModeInputWin;
+
+  for (i = 1; i < argc; i++) 
+    {
+      if (streq ("--fullscreen", argv[i]) || streq ("-fs", argv[i]))
+	{
+	  stroke->ui_mode = MBStrokeUIModeFullscreen;	      
+	}
+    }
 
   stroke->global_mode = mb_stroke_mode_new(stroke, 
 					   "global");
@@ -72,7 +83,7 @@ main(int argc, char **argv)
 {
   MBStroke *stroke = NULL;
 
-  stroke = mb_stroke_app_new(&argc, &argv);
+  stroke = mb_stroke_app_new(argc, argv);
 
   if (stroke)
     mb_stroke_run(stroke);
