@@ -23,7 +23,6 @@ struct MBStrokeUI
   Picture            pentip_pict;
   XRenderPictFormat *pentip_format;
 
-
   FakeKey           *fakekey;
   MBStroke          *stroke;
 
@@ -32,13 +31,10 @@ struct MBStrokeUI
 
   MBStrokeUIMode     mode;
 
-  int           fade_cnt;
+  int                fade_cnt;
+  boolean            have_grab;
 
-  /* unused ? */
-
-  XftDraw      *xft_backbuffer;  
-  Pixmap        backbuffer;
-  GC            xgc;
+  GC                 xgc;
 };
 
 #define UI_WANT_FULLSCREEN(u) ((u)->mode == MBStrokeUIModeFullscreen)
@@ -69,6 +65,12 @@ static struct {
 
 static void
 mb_stroke_ui_clear_recogniser(MBStrokeUI *ui, int alpha);
+
+static void
+mb_stroke_ui_fullscreen_init(MBStrokeUI *ui);
+
+static void
+mb_stroke_ui_fullscreen_stroke_finish(MBStrokeUI *ui);
 
 
 /* Fix byte order as it comes from the GIMP, and pre-multiply
@@ -113,40 +115,6 @@ handle_xerror(Display *dpy, XErrorEvent *e)
 }
 
 static boolean
-get_desktop_area(MBStrokeUI *ui, int *x, int *y, int *width, int *height)
-{
-  Atom           atom_area, type;
-  int            result, format;
-  long           nitems, bytes_after;
-  int           *geometry = NULL;
-
-  atom_area = XInternAtom (ui->xdpy, "_NET_WORKAREA", False);
-
-  result = XGetWindowProperty (ui->xdpy, 
-			       RootWindow(ui->xdpy, ui->xscreen),
-			       atom_area,
-			       0, 16L, False, XA_CARDINAL, &type, &format,
-			       &nitems, &bytes_after, 
-			       (unsigned char **)&geometry);
-
-  if (result != Success || nitems < 4 || geometry == NULL)
-    {
-      if (geometry) XFree(geometry);
-      return False;
-    }
-
-  if (x) *x           = geometry[0];
-  if (y) *y           = geometry[1];
-  if (width)  *width  = geometry[2];
-  if (height) *height = geometry[3];
-  
-  XFree(geometry);
-
-  return True;
-}
-
-
-static boolean
 get_xevent_timed(Display        *dpy,
 		 XEvent         *event_return, 
 		 struct timeval *tv)
@@ -178,6 +146,43 @@ get_xevent_timed(Display        *dpy,
       XNextEvent(dpy, event_return);
       return True;
     }
+}
+
+static boolean
+get_desktop_area(MBStrokeUI *ui, int *x, int *y, int *width, int *height)
+{
+  Atom           atom_area, type;
+  int            result, format;
+  long           nitems, bytes_after;
+  int           *geometry = NULL;
+
+  atom_area = XInternAtom (ui->xdpy, "_NET_WORKAREA", False);
+
+  result = XGetWindowProperty (ui->xdpy, 
+			       RootWindow(ui->xdpy, ui->xscreen),
+			       atom_area,
+			       0, 16L, False, XA_CARDINAL, &type, &format,
+			       &nitems, &bytes_after, 
+			       (unsigned char **)&geometry);
+
+  if (result != Success || nitems < 4 || geometry == NULL)
+    {
+      if (geometry) XFree(geometry); 
+      return False;
+    }
+
+  if (x) *x           = geometry[0];
+  /* 
+   * XXX !Big hack!. We add 20 here to account for the titlebar area.  
+   * This of course is very wrong. figure out better way    
+  */
+  if (y) *y           = geometry[1] + 20;
+  if (width)  *width  = geometry[2];
+  if (height) *height = geometry[3];
+  
+  XFree(geometry);
+
+  return True;
 }
 
 static boolean
@@ -336,12 +341,6 @@ mb_stroke_ui_resources_create(MBStrokeUI  *ui)
       ui->xwin_height = mb_stroke_ui_display_height(ui);
       ui->xwin        = ui->xwin_root;
 
-      if (XGrabPointer(ui->xdpy, ui->xwin_root, False,
-		       ButtonPressMask|ButtonReleaseMask|Button1MotionMask,
-		       GrabModeAsync,
-		       GrabModeAsync, 
-		       None, None, CurrentTime) == GrabSuccess)
-	printf("got grab");
 
     }
   else
@@ -466,19 +465,9 @@ mb_stroke_ui_resources_create(MBStrokeUI  *ui)
       ui->root_pixmap_orig = XCreatePixmap(ui->xdpy, ui->xwin,
 					   ui->xwin_width,
 					   ui->xwin_height,
-					   DefaultDepth(ui->xdpy, ui->xscreen));
-      XCopyArea(ui->xdpy, 
-		ui->xwin,
-		ui->root_pixmap_orig,
-		ui->xgc,
-		0, 0, ui->xwin_width, ui->xwin_height, 0, 0);
+					   DefaultDepth(ui->xdpy,ui->xscreen));
 
-      XCopyArea(ui->xdpy, 
-		ui->xwin,
-		ui->xwin_pixmap,
-		ui->xgc,
-		0, 0, ui->xwin_width, ui->xwin_height, 0, 0);
-
+      mb_stroke_ui_fullscreen_init(ui);
 
     }
   else
@@ -494,6 +483,99 @@ mb_stroke_ui_resources_create(MBStrokeUI  *ui)
   return 1;
 }
 
+static void
+mb_stroke_ui_fullscreen_init(MBStrokeUI *ui)
+{
+  Cursor cursor;
+
+  if (!UI_WANT_FULLSCREEN(ui))
+    return;
+
+  cursor = XCreateFontCursor(ui->xdpy, XC_left_ptr);
+
+  /*
+  if (XGrabButton(ui->xdpy, ui->xwin_root, False,
+		  ButtonPressMask|ButtonReleaseMask|Button1MotionMask,
+		  GrabModeAsync,
+		  GrabModeAsync, 
+		  None, cursor, CurrentTime) != GrabSuccess)
+  */
+
+  if (XGrabButton(ui->xdpy, 
+		  Button1, 
+		  AnyModifier, 
+		  ui->xwin_root, 
+		  True, 
+		  ButtonPressMask|ButtonReleaseMask|ButtonMotionMask,
+		  GrabModeSync, 
+		  GrabModeAsync, None, None) != GrabSuccess)
+    {
+      /* fprintf(stderr, "matchbox-stroke: mouse grab failed"); */
+    }
+
+}
+
+
+static void
+mb_stroke_ui_fullscreen_stroke_finish(MBStrokeUI *ui)
+{
+  if (!UI_WANT_FULLSCREEN(ui))
+    return;
+
+  /* copy our backup of the root */
+  XCopyArea(ui->xdpy, 
+	    ui->root_pixmap_orig,
+	    ui->xwin,
+	    ui->xgc,
+	    0, 0, ui->xwin_width, ui->xwin_height, 0, 0);
+
+  // XUngrabServer(ui->xdpy);
+
+  XSync(ui->xdpy, False);
+}
+
+static boolean
+mb_stroke_ui_fullscreen_stroke_start(MBStrokeUI *ui, int x, int y)
+{
+  int wa_x, wa_y, wa_width, wa_height;
+
+  if (!UI_WANT_FULLSCREEN(ui))
+    return True;
+
+  // XGrabServer(ui->xdpy);
+
+  if (get_desktop_area(ui, &wa_x, &wa_y, &wa_width, &wa_height))
+    {
+      if (x < wa_x || y < wa_y 
+	  || x > wa_x + wa_width 
+	  || y > wa_y + wa_height)
+	{
+	  /* pass this event through our grab */
+	  printf("allowing events\n");
+	  XAllowEvents(ui->xdpy, ReplayPointer, CurrentTime);
+	  return False;
+	}
+    }
+
+  XAllowEvents(ui->xdpy, AsyncPointer, CurrentTime);
+
+  /* make a temp copy of root win */
+  XCopyArea(ui->xdpy, 
+	    ui->xwin,
+	    ui->root_pixmap_orig,
+	    ui->xgc,
+	    0, 0, ui->xwin_width, ui->xwin_height, 0, 0);
+
+  /* also copy it to what we'll draw on */
+  XCopyArea(ui->xdpy, 
+	    ui->xwin,
+	    ui->xwin_pixmap,
+	    ui->xgc,
+	    0, 0, ui->xwin_width, ui->xwin_height, 0, 0);
+
+  return True;
+}
+
 
 static void
 mb_stroke_ui_clear_recogniser(MBStrokeUI *ui, int alpha)
@@ -504,11 +586,7 @@ mb_stroke_ui_clear_recogniser(MBStrokeUI *ui, int alpha)
 
   if (UI_WANT_FULLSCREEN(ui))
     {
-      XCopyArea(ui->xdpy, 
-		ui->root_pixmap_orig,
-		ui->xwin,
-		ui->xgc,
-		0, 0, ui->xwin_width, ui->xwin_height, 0, 0);
+      /* nothing as yet */
     }
   else
     {
@@ -574,9 +652,9 @@ mb_stroke_ui_pentip_draw_line_to(MBStrokeUI *ui, int x2, int y2)
 void
 mb_stroke_ui_stroke_start(MBStrokeUI *ui, int x, int y)
 {
-  // mb_stroke_ui_clear_recogniser(ui, 0x9999);
-
-
+  /* init for fullscreen mode */
+  if (!mb_stroke_ui_fullscreen_stroke_start(ui, x, y))
+    return;
 
   mb_stroke_stroke_new(ui->stroke);
 
@@ -593,6 +671,8 @@ mb_stroke_ui_stroke_update(MBStrokeUI *ui, int x, int y)
 
   mb_stroke_stroke_append_point(mb_stroke_current_stroke(ui->stroke), x, y); 
 }
+
+
 
 void
 mb_stroke_ui_stroke_finish(MBStrokeUI *ui, int x, int y)
@@ -612,8 +692,7 @@ mb_stroke_ui_stroke_finish(MBStrokeUI *ui, int x, int y)
 
       if (UI_WANT_FULLSCREEN(ui))
 	{
-	  XUngrabPointer(ui->xdpy, CurrentTime); 
-	  mb_stroke_ui_clear_recogniser(ui, 0xffff);
+	  mb_stroke_ui_fullscreen_stroke_finish(ui);
 	}
 
       action = mb_stroke_mode_match_seq(mb_stroke_current_mode(ui->stroke), 
@@ -623,6 +702,7 @@ mb_stroke_ui_stroke_finish(MBStrokeUI *ui, int x, int y)
     }
   else
     {
+      mb_stroke_ui_fullscreen_stroke_finish(ui);
       printf("recog failed\n");
     }
 
