@@ -15,8 +15,148 @@
 
    <stroke exact="654" action="backspace"  />
 
-   <stroke exact="357" sloppy="3[26]?5[48]?7?" action="return"  />
+<stroke sloppy="3[26]?5[48]?7?" action="Return" />
+<stroke sloppy="2585" action="Down" />
+<stroke sloppy="6545" action="Left" />
+<stroke sloppy="8?5258" action="1" />
+<stroke sloppy="[78]?[45]5?1?(23?[56]6?|4?5)8?9?8?" action="a" />
+<stroke sloppy="([12]*[45][78]|[12][45]+[78]?)?[78]*[4]*(1?[2][369]+|1[25][369]*)([369]+[25]+8?[147]?[258]*[369]+|[25]*8?[147]+[258]+[369]*)([369]*[58][74]+|[369]+[58][74]*)" action="b" />
+<stroke sloppy="[21][21]?[54]4?[78]+4?8?58?[69]9?87?4?" action="b" />
+<stroke sloppy="6?3?2[15]?47?[58]8?9?6?" action="c" />
+<stroke sloppy="123698" action="t" />
+<stroke sloppy="(([12]?[45]+|9?8)?[78][45]*)?1?23?6(5?8[47]|9[58]8?)7?4?" action="d" />
+<stroke sloppy="(3?6(56)?|26?5(6[89]+)?|23?6?9)[89]*[658]*[32]*[254]+[47]7?89?6?" action="d" />
+<stroke sloppy="9?6?[25]+[47]7?[258]+9?[256]?[23]+[56]*9?[89]*" action="d" />
+<stroke sloppy="1?[47]?2?[58]?2?6?3?21?4[57]?89?6?" action="e" />
+<stroke sloppy="6?3?21?47" action="f" />
+<stroke sloppy="3?21?5?45?7?89?((6?5[478]+?5?|68[47]*)|85[47]*)" action="g" />
+<stroke sloppy="3?21?5?45?7?89?((6?5[478]+?5?|68[47]*)|85[47]*)?[258]*6?9?" action="g" />
+<stroke sloppy="3?21?2?[45]1?[256]+[32]+[56]+(98?7?|87)4?" action="g" />
+<stroke sloppy="[12]1?47[478]*[56][68]?9?" action="h" />
+<stroke sloppy="3?69?8[74]4?" action="j" />
+<stroke sloppy="(3[26]?|3?[26])([58]8?)([48][57])?[47](1[24])?[57]?[68]?9" action="k" />
+<stroke sloppy="1?47?89" action="l" />
+<stroke sloppy="([12]*[45]|[12][45]*)?([78]*[45][123]+|[78][145][123]*)(([123]+[456]+[789]*|[456]+[789]+)[45]*[123]+|[456]*[78]+[456]+[123]*)([123]*[56][98]+|[123]+[56][98]*)" action="m" />
+<stroke sloppy="([87]*[45]5?[12]+|[87]+[45]5?[12]*)([456]*[789]+|[12][45]5?[789]*)[56]6?3?2?" action="n" />
+<stroke sloppy="3?(21?[54][45]?7?89?63?2?|2?1?[54]4?7?89?63?2)1?4?" action="o" />
+<stroke sloppy="7?89?63?21?4?" action="p" />
+<stroke sloppy="([12]*[456]+|[12][456]*)?[789]*[45]+1?2[36]6?(2?52?[14]*|[25]*41?)" action="p" />
+<stroke sloppy="([12]*4)?[78]*[45]+[12]2?([36]*[25]+[14]|[36]+[258]+)([14]*[25]*6?9|[14]+7?[258]+[69]?)" action="r" />
+<stroke sloppy="([12]*4)?[78]+[45]+[12]2?[36]*[258]+([14]*[25]*6?9|[14]+7?[258]+[69]9?)" action="r" />
+<stroke sloppy="6?3?25?([369]+(58)?8?7?4?|[14]+[25]*(5[25]*[369]*5?87?4?|[369]*874?))" action="s" />
+<stroke sloppy="1?23?65?[98]8?" action="t" />
+<stroke sloppy="1?47?89?63?2?" action="u" />
+<stroke sloppy="1?47?89?[26]3?2?[56]+9?" action="u" />
+<stroke sloppy="1?[245]5?[78]8?[49]?[256]+3?" action="v" />
+<stroke sloppy="3?6?[56](8|987)7?[45]*41?" action="v" />
+<stroke sloppy="1?([24]?5|[24]7)([68][59])?6(3[256]1?)?[59]?[48]?7" action="x" />
+<stroke sloppy="12?[45]+1?6?[23]+[56]*[89]+" action="y" />
+<stroke sloppy="12?[45]+1?6?[23]+[56]*[89]+7?8?9?[456]*[23]*" action="y" />
+<stroke sloppy="([12]*[45][789]+|[12][745][789]*)(([78]+[45]+[123]*|[45]+[12]+)[456]*[789]+|[45]*[12]+[456]+[789]*)([789]*[56]+[32]+|[789]+[56]+[32]*)" action="w" />
+<stroke sloppy="1?2(3[26]?5[48]?7?|3?[26]?5[48]?7)89?" action="z" />
+ <stroke exact="8525" action="Up" />
+<stroke exact="4565" action="Right" />
+<stroke sloppy="3?2?1?[54][45]?7?89?6[32]+1?4?" action="0" />
+<stroke sloppy="1?23?[26]?5[48]?([47]*?[58]+|47?[58]*)[69]*" action="2" />
+<stroke sloppy="4?(1?[2][369]+|1[25][369]*)([369]+[25]+[147]?[258]*[369]+|[25]*[147]+[258]+[369]*)([369]*[58][74]+|[369]+[58][74]*)" action="3" />
+<stroke sloppy="3?[26]?[15]?[45][57]?8[59]?6?9?[58]+[47]*1?" action="6" />
+<stroke sloppy="5" action="period" />
+<stroke sloppy="3[26]?5[48]?7?" action="comma" />
+<stroke sloppy="9?8[75]?4[15]?23?" action="less" />
+<stroke sloppy="7?8[59]?6[35]?21?4?" action="greater" />
+<stroke sloppy="(9?[8][147]+|9[58][147]*)([147]+[58]+[69]?[258]*[147]+|[58]*[69]+[258]+[147]*)([147]*[25][36]+|[147]+[25][36]*)" action="bracketleft" />
+<stroke sloppy="7[48]?5[26]?3" action="slash" />
+<stroke sloppy="4?1?23?[26]?54?7?" action="question" />
+<stroke sloppy="1?23?[26]?5[48]?7?89?[58]+[47]*8?" action="braceright" />
+<stroke sloppy="147[48]?5[26]?369" action="numbersign" />
+<stroke sloppy="6?3?2[15]?47?[58]8?9?6?" action="parenleft" />
+<stroke sloppy="1?2[35]?6[59]?87?4?" action="parenright" />
+<stroke sloppy="6?3?25?([369]+(58)?8?7?4?|[14]+[25]*(5[25]*[369]*5?87?4?|[369]*874?))" action="dollar" />
+<stroke sloppy="6?3?25?15?4(7?[58]8?9?6?|[78]+9?6?9?)87?" action="dollar" />
+<stroke sloppy="9[68]?5[24]?1?" action="backslash" />
+<stroke sloppy="(3[26]?|3?[26])([58]8?)([48][57])?[47](1[24])?[57]?[68]?9" action="plus" />
+<stroke sloppy="1?2(3[26]?5[48]?7?|3?[26]?5[48]?7)89?" action="equal" />
+<stroke sloppy="(123?|23)((56?5?)?8[47]|5?6?9[58]8?)7?4?[58]+[69]*" action="equal" />
+<stroke sloppy="4?5654?" action="underscore" />
+<stroke sloppy="1?([24]?5|[24]7)([68][59])?6(3[256]1?)?[59]?[48]?7" action="asterisk" />
+<stroke sloppy="8?5258?" action="bar" />
+<stroke sloppy="3?[26]?5[48]?7?[48]?5[26]?3" action="semicolon" />
+<stroke sloppy="2?5852?" action="colon" />
+<stroke sloppy="741?23" action="Tab" />
+<stroke sloppy="369?[68]?[58][24]?1" action="Escape" />
+<stroke sloppy="1?(23?[56][56]?9?87?41?2?|2?3?[56]6?9?87?41?2)3?6?" action="at" />
+<stroke sloppy="([12]*[45]+[789]+|[12][745]+[789]*)([78]*[45]*[123]*[456]*[789]+|[45]*[12]+[456]+[789]*)([789]*[56]+[32]+|[789]+[56]+[32]*)" action="percent" />
+<stroke sloppy="[78]?[45]5?1?(23?[56]6?|4?5)8?9?8?" action="asciicircum" />
+<stroke sloppy="9?[68]?5[24]?1?[24]?5[68]?9?" action="quoteleft" />
+<stroke sloppy="[78]?[45]5?1?(23?(56?[89]+[856]*[124]*|6[89]+[856]*[1234]*)|4?58?9?[856]*4?[12]+)" action="n" />
+<stroke sloppy="(123?|23)((56?5?)?8[47]|5?6?9[58]8?)7?4?[58]+[69]*" action="z" />
+<stroke sloppy="3?21?2?[45]?1?[256]*[32]*[56]+(98?7?|87)4?[58]*2?[369]*" action="g" />
+<stroke sloppy="2?(3?69?8[74]4?|(3?6|2)59?8[74]4?)7?8[69]*" action="d" />
+<stroke sloppy="([87]*[45]5?[12]+|[87]+[45]5?[12]*)([456]*[789]+|[45]5?6?[789]*)[56]6?3?2?[56]+[89]*" action="m" />
+<stroke sloppy="3?([26][15]?[54]4?7?8[59]?[65]5?3?2?|[26]?[15]?[54]4?7?8[59]?[65]5?3?2)1?4?[25]+[36]*" action="q" />
+<stroke sloppy="6?3?25?([369]+(58)?8?7?4?|[14]+[25]*(5[25]*[369]*5?87?4?|[369]*874?))[58]+[69]*" action="e" />
+<stroke sloppy="1?([24]?5|[24]7)([68][59])?6(3[256]1?)?3?5?[48]?78?9?[456]+[1236]*" action="y" />
+<stroke sloppy="[78]?[45]5?1?(23?(56?[89]+[856]*[124]*|6[89]+[856]*[1234]*)|4?58?9?[856]*4?[12]+)" action="A" />
+<stroke sloppy="[21][21]?[54]4?[78]+4?8?58?[69]9?87?4?[58]*[69]*" action="B" />
+<stroke sloppy="6?3?25?15?4(7?[58]8?9?6?|[78]+9?6?9?)87?" action="C" />
+<stroke sloppy="(123?|23)((56?5?)?8[47]|5?6?9[58]8?)7?4?[58]+[69]*" action="D" />
+<stroke sloppy="(3?6(56)?|26?5(6[89]+)?|23?6?9)[89]*[658]*[32]*[15]?([47]+|[58]+)89?[69]+[58]+[47]+" action="D" />
+<stroke sloppy="1?[47]?2?[58]?2?6?3?[25]+1?4[57]?89?6?[58]+[47]*" action="E" />
+<stroke sloppy="6?3?21?478?7?[45]*[12]*" action="F" />
+<stroke sloppy="2?58?52" action="I" />
+<stroke sloppy="3?21?5?45?7?89?((6?5|68)|85)([47]+[258]+([369]+[258]+)?|[47]*[258]+([369]+[258]+))[147]*" action="G" />
+<stroke sloppy="2?(3?69?8[74]4?|(3?6|2)59?8[74]4?)7?8[69]*" action="J" />
+<stroke sloppy="(3[26]?|3?[26])([58]8?)([48][57])?[47]+(1[24]3?)?1?[57]?[68]?9[568]+([12347]|5)[1245]*" action="K" />
+<stroke sloppy="1?47?89[58]*[47]*" action="L" />
+<stroke sloppy="([12]*[45]|[12][45]*)?([78]*[45]+[123]+|[78][145]+[123]*)(([123]+[456]+[789]*|[456]+[789]+)[456]*[123]+|[456]*[789]+[456]+[123]*)([123]*[56]+[98]+|[123]+[56]+[98]*)[56]+[23]*" action="M" />
+<stroke sloppy="([87]*[45]5?[12]+|[87]+[45]5?[12]*)([456]*[789]+|[45]5?6?[789]*)[56]6?3?2?[56]+[89]*" action="N" />
+<stroke sloppy="([12]*[456]+|[12][456]*)?([789]*4|[789]+[45]+)1?2[36]?(6|(6?(2?5|25?)2?8?[147]*|[25]*8?1?41?7?))[25]+[36]*" action="P" />
+<stroke sloppy="4?[57]?([48][59]?63?2[15]?[45][57]?|[48]?[59]?63?2[15]?[45][57]?)(87|8?9?6?9[58]+[47]*[58]*)" action="Q" />
+<stroke sloppy="([12]*[45]|[12][45]*)[78]*4?5?1?23?[25]+[14]*" action="R" />
+<stroke sloppy="1?[245]5?8[49]?[256]+3[56]*9?8?" action="V" />
+<stroke sloppy="3?6?[56](8|987)[7845]*41?2?[456]+[789]*" action="V" />
+<stroke sloppy="1?2?3?69?87?41?2?3?" action="0" />
+<stroke sloppy="9?8([74][48]?[58]9?[26]?3?|7?[48]?[58]9?[26]?[63]3?)21?4?" action="2" />
+<stroke sloppy="(7?[8][369]+|7[58][369]*)([369]+[58]+[47]?[258]*[369]+|[58]*[47]+[258]+[369]*)([369]*[25][14]+|[369]+[25][14]*)" action="3" />
+<stroke sloppy="[89]9?5?65?36?9?(87?4|54?)1?2?" action="4" />
+<stroke sloppy="7?4?[58][69]*87?4[15]?2?3?" action="6" />
+<stroke sloppy="([47]*[58]5?[69]+|[47]+[58]5?[69]*)([58]*[147]+(25)?|[58]+[147]*5?2)23?6?" action="5" />
+<stroke exact="[47][58]842" action="6" />
+<stroke sloppy="963?21" action="7" />
+<stroke sloppy="3?2[14]?4?[25]+[69]9?87?[4598]+[12356]*" action="8" />
+<stroke sloppy="3?6?(5[41]*|2[41]*4[41]*)23?69?8?9?" action="9" />
+<stroke sloppy="[789]*[56]+3?2[14]4?(2?52?[36]*|[25]*63?)" action="9" />
+<stroke sloppy="65456" action="period" />
+<stroke sloppy="3?2123?[26]?5[48]?7?" action="comma" />
+<stroke sloppy="3?2(12)?3?6[89]+" action="colon" />
+<stroke sloppy="2?5(85?)?2?58?5?" action="exclam" />
+<stroke sloppy="45654" action="minus" />
+<stroke sloppy="1?2(32)?1?47?89?" action="equal" />
+<stroke sloppy="1?23?21?[45][78]+" action="question" />
+<stroke sloppy="4?5(65)?456?" action="underscore" />
+<stroke sloppy="2587456" action="plus" />
+<stroke sloppy="1?258?[74]4?56" action="plus" />
+<stroke sloppy="7?4147?89" action="bar" />
+<stroke sloppy="789?63" action="bracketright" />
+<stroke sloppy="(654?|987?4)14[78]?" action="braceleft" />
+<stroke sloppy="(456?|789?6)36[89]?" action="braceright" />
+<stroke sloppy="987[48]?5[26]?3?" action="less" />
+<stroke sloppy="789[68]?5[24]?1?" action="greater" />
+<stroke sloppy="9?[68]?5([24]?1|[24]1?)2[36]*" action="parenleft" />
+<stroke sloppy="7?[48]?5([26]?3|[36]3?)2[14]*" action="parenright" />
+<stroke sloppy="7[48]?5[26]?3?[26]?5[48]?7?" action="quoteright" />
+<stroke sloppy="3?[26]?5[48]?7?[48]?5[26]?3" action="semicolon" />
+<stroke sloppy="7[48]?5[26]?3" action="slash" />
+<stroke sloppy="8?9[68]?5?[34]?(2?1?[54]4?|6?5)[78]*" action="asciicircum" />
+<stroke sloppy="9?63?[26]?56?5?[48]?741?" action="numbersign" />
+<stroke sloppy="3?69?[68]?5?[24]?147?" action="asciitilde" />
+<stroke sloppy="7[48]?[15]([26][53])?6(9[568]7?)?[53]?[24]?1" action="asterisk" />
+<stroke sloppy="9[68]?5?[24]?1?47?89?" action="ampersand" />
+<stroke sloppy="2?589?63?21?47?8?9?[89]?" action="at" />
+<stroke sloppy="3?2[14]?4?[58]+[69]?9?874[12][12]?" action="dollar" />
 
+
+<!--
    <stroke exact="741269" 
           sloppy="[78]?[45]5?1?(23?[56]6?|4?5)8?9?8?" 
           action="a"  />
@@ -71,6 +211,7 @@
    <stroke exact="32147" action="f" />
 
    <stroke exact="1235789" action="z" />
+-->
 
     <mode id="abc">
 <!--

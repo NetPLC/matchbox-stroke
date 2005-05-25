@@ -295,6 +295,7 @@ mb_stroke_ui_resources_create(MBStrokeUI  *ui)
   XSetWindowAttributes win_attr;
   int                  desk_width = 0, desk_height = 0;
 
+  XRenderColor         coltmp;
 
   /*
   atom_wm_protocols = { 
@@ -479,6 +480,18 @@ mb_stroke_ui_resources_create(MBStrokeUI  *ui)
   
       mb_stroke_ui_clear_recogniser(ui, 0xffff);
     }
+
+  coltmp.red = 0xbbbb; 
+  coltmp.green = coltmp.blue  = 0x0000; 
+  coltmp.alpha = 0xdddd;
+
+  XftColorAllocValue(ui->xdpy,
+		     DefaultVisual(ui->xdpy, ui->xscreen), 
+		     DefaultColormap(ui->xdpy, ui->xscreen),
+		     &coltmp,
+		     &ui->font_col);
+
+  ui->font = XftFontOpenName(ui->xdpy, ui->xscreen, "Sans-24:bold");
   
   return 1;
 }
@@ -537,7 +550,8 @@ mb_stroke_ui_fullscreen_stroke_finish(MBStrokeUI *ui)
 static boolean
 mb_stroke_ui_fullscreen_stroke_start(MBStrokeUI *ui, int x, int y)
 {
-  int wa_x, wa_y, wa_width, wa_height;
+  XftDraw *xftdraw;
+  int      wa_x, wa_y, wa_width, wa_height;
 
   if (!UI_WANT_FULLSCREEN(ui))
     return True;
@@ -572,6 +586,43 @@ mb_stroke_ui_fullscreen_stroke_start(MBStrokeUI *ui, int x, int y)
 	    ui->xwin_pixmap,
 	    ui->xgc,
 	    0, 0, ui->xwin_width, ui->xwin_height, 0, 0);
+
+  /* render our 'mode' */
+
+  xftdraw = XftDrawCreate(ui->xdpy,
+			  ui->xwin_pixmap,
+			  DefaultVisual(ui->xdpy, ui->xscreen),
+			  DefaultColormap(ui->xdpy, ui->xscreen));
+
+  /*
+  XftTextRender8 (ui->xdpy,
+		  PictOpOver,
+		  XftDrawSrcPicture (xftdraw, &ui->font_col),
+		  ui->font,
+		  ui->xwin_pict,
+		  0,0,
+		  0,0,
+		  "ABC",
+		  3);
+*/
+
+  XftDrawStringUtf8(xftdraw,
+		    &ui->font_col,
+		    ui->font,
+		    10,
+		    10 + ui->font->ascent,
+		    "Recognising", 
+		    strlen("Recognising"));
+
+
+
+  XCopyArea(ui->xdpy, 
+	    ui->xwin_pixmap,
+	    ui->xwin, 
+	    ui->xgc,
+	    0, 0, ui->xwin_width, ui->xwin_height, 0, 0);
+
+  /* XXX free xftdraw */
 
   return True;
 }

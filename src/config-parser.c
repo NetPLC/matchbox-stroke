@@ -343,16 +343,26 @@ config_handle_stroke_tag(MBStrokeConfigState *state, const char **attr)
 
   exact = attr_get_val("exact", attr);
 
+  /*
   if (!exact)
     {
       state->error_msg = "stroke tag missing 'exact' attribute";
       state->error     = True;
       return;
     }
-
-  mb_stroke_mode_add_exact_match(state->current_mode, exact, action);
+  */
+  
+  if (exact)
+    mb_stroke_mode_add_exact_match(state->current_mode, exact, action);
   
   sloppy = attr_get_val("sloppy", attr);
+
+  if (!exact && !sloppy)
+    {
+      state->error_msg = "stroke tag missing 'exact' or 'sloppy' attribute";
+      state->error     = True;
+      return;
+    }
 
   if (sloppy)
     mb_stroke_mode_add_fuzzy_match(state->current_mode, sloppy, action);

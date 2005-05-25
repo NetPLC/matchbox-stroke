@@ -1,3 +1,14 @@
+2005-05-25  mallum,,,  <mallum@openedhand.com>
+
+	* data/strokes.xml:
+	Dump a load of ported xstroke strokes into config
+	* src/config-parser.c: (config_handle_stroke_tag):
+	Dont barf on exact-less strokes
+	* src/matchbox-stroke-ui.c: (mb_stroke_ui_resources_create),
+	(mb_stroke_ui_fullscreen_stroke_finish),
+	(mb_stroke_ui_fullscreen_stroke_start):
+	Clean up a little and display some text when reconising
+
 2005-05-23  mallum,,,  <mallum@openedhand.com>
 
 	* src/matchbox-stroke-ui.c: (handle_xerror),
