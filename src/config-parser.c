@@ -104,7 +104,7 @@ config_str_to_keysym(const char* str)
   DBG("checking %s", str);
 
   for (i=0; i<sizeof(MBStrokeKeysymLookup)/sizeof(struct _keysymlookup); i++)
-    if (streq(str, MBStrokeKeysymLookup[i].name))
+    if (!strcasecmp(str, MBStrokeKeysymLookup[i].name))
       return MBStrokeKeysymLookup[i].keysym;
 
   DBG("didnt find it %s", str);
@@ -324,12 +324,7 @@ config_handle_stroke_tag(MBStrokeConfigState *state, const char **attr)
       if (strlen(val) > 1  	/* match backspace, return etc */
 	  && ((found_keysym  = config_str_to_keysym(val)) != 0))
 	{
-	  /*
-	      mb_kbd_key_set_keysym_action(state->current_key, 
-					   keystate,
-					   found_keysym);
-	  */
-
+	  mb_stroke_action_set_as_keysym(action, found_keysym);
 	}
       else
 	{

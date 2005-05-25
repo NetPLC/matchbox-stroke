@@ -1,6 +1,13 @@
 2005-05-25  mallum,,,  <mallum@openedhand.com>
 
 	* data/strokes.xml:
+	* src/config-parser.c: (config_str_to_keysym),
+	(config_handle_stroke_tag):
+	Make keysyms work ( i.e return, backspace etc )
+
+2005-05-25  mallum,,,  <mallum@openedhand.com>
+
+	* data/strokes.xml:
 	Dump a load of ported xstroke strokes into config
 	* src/config-parser.c: (config_handle_stroke_tag):
 	Dont barf on exact-less strokes

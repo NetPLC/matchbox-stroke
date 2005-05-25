@@ -13,9 +13,9 @@
 -->
    <!-- global -->
 
-   <stroke exact="654" action="backspace"  />
+<stroke exact="654" action="backspace"  />
 
-<stroke sloppy="3[26]?5[48]?7?" action="Return" />
+<stroke sloppy="3[26]?5[48]?7?" action="return" />
 <stroke sloppy="2585" action="Down" />
 <stroke sloppy="6545" action="Left" />
 <stroke sloppy="8?5258" action="1" />
