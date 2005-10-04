@@ -4,7 +4,10 @@ EXTRA_DIST = matchbox-stroke.desktop matchbox-stroke.png \
              matchbox-stroke-fullscreen.desktop matchbox-stroke-fullscreen.png
 
 desktopdir = $(datadir)/applications/inputmethods
-desktop_DATA = matchbox-stroke.desktop matchbox-stroke-fullscreen.desktop
+desktop_DATA = matchbox-stroke.desktop 
+
+# disabled for now;
+# matchbox-stroke-fullscreen.desktop 
 
 pixmapsdir = $(datadir)/pixmaps/
 pixmaps_DATA = matchbox-stroke.png matchbox-stroke-fullscreen.png
