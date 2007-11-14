@@ -29,10 +29,6 @@ AC_ARG_ENABLE(debug,
   [  --enable-debug    enable debug ( verbose ) build],
      enable_debug=$enableval, enable_debug=no )
 
-AC_ARG_ENABLE(expat,
-  [  --enable-expat                enable expat XML parser support],
-       enable_expat=$enableval, enable_expat=no )
-
 AC_ARG_WITH(expat-includes,    
   [  --with-expat-includes=DIR     Use Expat includes in DIR], 
 	   expat_includes=$withval, expat_includes=yes)
@@ -58,20 +54,11 @@ dnl ------ Expat ------------------------------------------------------------
 	
   case "$expat_lib" in
     yes)
-
-	case "$expat" in
-	  yes|"")
-		EXPAT_LIBS="-lexpat"
-		;;
-	    *)
-		EXPAT_LIBS="-L$expat/lib -lexpat"
-		;;
-	esac
-
+	EXPAT_LIBS="-lexpat"
 	;;
-   no)
+    no)
 	;;
-   *)
+    *)
 	EXPAT_LIBS="-L$expat_lib -lexpat"
 	;;
    esac
