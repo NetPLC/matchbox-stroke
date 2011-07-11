@@ -38,7 +38,7 @@ AC_ARG_WITH(expat-lib,
 	   expat_lib=$withval, expat_lib=yes)
 
 
-PKG_CHECK_MODULES(MBSTROKE, xft libfakekey,,
+PKG_CHECK_MODULES(MBSTROKE, xft libfakekey xrender,,
 	         AC_MSG_ERROR([*** Required Librarys not found ***]))
 
 dnl ------ Expat ------------------------------------------------------------
